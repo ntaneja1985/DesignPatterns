@@ -1,0 +1,60 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DesignPatterns
+{
+    //internal class Abstraction
+    //{
+        interface ICustomer
+        {
+            string Name { get; set; }
+            string Age { get; set; }
+            decimal Amount { get; set; }
+
+            decimal Rating { get; set; }
+            decimal CalculateDiscount();
+            List<IAddress> Addresses();
+        }
+        interface IProduct
+        {
+
+        }
+
+    //Example of Aggregation, list of IAddresses can be used with Supplier or Customer, there is no exclusive ownership
+    interface ISupplier
+    {
+        List<IAddress> Addresses();
+
+    }
+
+    interface IAddress
+    {
+        string Address1 { get; set; }
+        string City { get; set; }
+        string Region { get; set; }
+        string PostalCode { get; set; }
+        string Country { get; set; }
+        string Phone { get; set; }
+    }
+
+        interface IRating
+        {
+        public decimal getRating(ICustomer customer);
+        }
+        interface IDiscount
+        {
+            decimal Calculate(ICustomer customer);
+
+        }
+
+    interface IEnquiry
+    {
+        string Name { get; set; }
+        string Age { get; set; }
+    }
+
+}
