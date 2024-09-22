@@ -10,10 +10,16 @@ namespace DesignPatterns
     //Move all common methods across classes into BaseClass
     public abstract class BaseCustomer : ICustomer
     {
+        //public BaseCustomer(IAddress i)
+        //{
+        //    AddressList = new List<IAddress> { i };
+        //}
         public string Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Age { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public virtual decimal Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public decimal Rating { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public abstract List<IAddress> Addresses { get; set; }
+        public List<IAddress> AddressList { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         string ICustomer.Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         string ICustomer.Age { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         decimal ICustomer.Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -39,15 +45,59 @@ namespace DesignPatterns
 
     //Not necessary to write ICustomer here as Base Customer already implements it
     //However it is good from readability perspective
-    public class Customer: BaseCustomer, ICustomer
+    public class Customer : ICustomer
     {
+        public string Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string Age { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public decimal Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public decimal Rating { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+        public decimal CalculateDiscount()
+        {
+            throw new NotImplementedException();
+        }
+
+        List<IAddress> ICustomer.Addresses()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<IAddress> Addresses { get; set; }
+        public List<IAddress> AddressList { get; set; }
+
+   
+    }
+
+    public class HomeAddressImpl : HomeAddress
+    {
+        public string Address1 { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string City { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string Region { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string PostalCode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string Country { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string Phone { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    }
+
+    public class OfficeAddressImpl : OfficeAddress
+    {
+        public string Address1 { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string City { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string Region { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string PostalCode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string Country { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string Phone { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    }
+
+    public class CustomerVIP : BaseCustomer, ICustomer
+    {
+        public override List<IAddress> Addresses { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
     public class EnquiryCustomer: BaseCustomer, ICustomer
     {
         //Wrong implementation
         public override decimal Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override List<IAddress> Addresses { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
     public class EnquiryNew : IEnquiry
@@ -58,7 +108,7 @@ namespace DesignPatterns
 
     class NormalCustomer2 : BaseCustomer, ICustomer
     {
-       
+        public override List<IAddress> Addresses { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
     class NormalCustomer : ICustomer
     {
@@ -72,6 +122,7 @@ namespace DesignPatterns
         public string Age { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public decimal Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public decimal Rating { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<IAddress> AddressList { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public List<IAddress> Addresses()
         {
@@ -98,6 +149,7 @@ namespace DesignPatterns
     public class CustomerAgeType : ICustomer
     {
         public decimal Rating { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<IAddress> AddressList { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         string ICustomer.Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         string ICustomer.Age { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         decimal ICustomer.Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -169,6 +221,22 @@ namespace DesignPatterns
         }
     }
 
+    class DiscountRegion : IDiscount
+    {
+        public decimal Calculate(ICustomer customer)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class DiscountAmount : IDiscount
+    {
+        public decimal Calculate(ICustomer customer)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 
     //Wrong -Not job of customer to calculate discount
     public class WeekendCustomer : BaseCustomer, ICustomer
@@ -178,11 +246,12 @@ namespace DesignPatterns
         //    //If customer comes on weekend, discount is more
         //    throw new NotImplementedException();
         //}
+        public override List<IAddress> Addresses { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
-    public class TestCustomer : BaseCustomer, ICustomer 
+    public class TestCustomer : BaseCustomer, ICustomer
     {
-
+        public override List<IAddress> Addresses { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
     public class Repository : IRepository
@@ -216,6 +285,10 @@ namespace DesignPatterns
         }
     }
 
+    public class CustomerRating
+    {
+        public int Rating { get; set; }
+    }
 
 
 }

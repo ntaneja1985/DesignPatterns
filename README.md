@@ -471,9 +471,9 @@ namespace EmployeeManagement
 
 ```
 
-By following DIP, we’ve achieved better separation of concerns and improved testability. Plus, we’re ready to adapt to changes in data access without breaking our entire system.
+By following DIP, we've achieved better separation of concerns and improved testability. Plus, we're ready to adapt to changes in data access without breaking our entire system.
 
-Remember, DIP isn’t just about interfaces; it’s about designing your system to depend on abstractions rather than concrete detail
+Remember, DIP isn't just about interfaces; it's about designing your system to depend on abstractions rather than concrete detail
 
 ### Now in latest version of C#, we can write concrete methods in Interfaces, but it is a hack. Earlier people used to create Abstract classes for this purpose. Any common logic between classes can be implemented in Abstract class
 
@@ -483,3 +483,287 @@ Remember, DIP isn’t just about interfaces; it’s about designing your system to d
 - SOA is an architectural style, Event Sourcing is a microservices design pattern
 - If there is no common logic between classes, then abstract class is not really required. However utilizing interfaces is a good practice.
 - Dont create abstract classes first. Usually they are made while refactoring.Also called Late architecting
+
+***SOLID is all about decoupling. How one class can be decoupled from the other class***
+
+# Factory Pattern
+
+- Part of GoF patterns
+- Creational design pattern that provides an interface for creating objects in a way that allows subclasses to decide which class to instantiate.
+
+```c#
+//Tight coupling
+IDiscount discount = new AgeDiscount();
+
+//Better Option
+//Caller doesnot create instance, we delegate it to someone
+IDiscount discount = Someone.Create(1);
+```
+
+- Think of it this way, imagine a factory that takes the same input of wood and creates table,chair,sofa,bed etc.
+- It’s like having a customizable assembly line for creating objects
+
+```c#
+internal static class SimpleFactory
+    {
+        public static IDiscount CreateDiscount(int id)
+        {
+            if (id == 0)
+            {
+                return new DiscountAmount();
+            }
+            else if (id == 1)
+            {
+                return new DiscountRegion();
+            }
+            else if (id == 2) 
+            {
+                return new AgeDiscount();
+            }
+
+            return new NormalDiscount();
+        }
+    }
+
+\\Inside Main Method use it like this
+IDiscount discount2 = SimpleFactory.CreateDiscount(2);
+discount2.Calculate(cust);
+
+```
+
+***Centralize our object creation(Simple Factory Pattern) and refer to abstraction in our client***
+
+## IOC: Inversion of Control
+- Earlier when we were doing new Discount(), the main method was incharge of creating the discount object. Now we have inverted this control of object creation to the SimpleFactory.
+- Inversion of Control is a thought process or principle, which is any kind of unnecessary work give it someone else and you focus on your work
+- Not the job of main method() to create object instances. Invert the control i.e give the control to Simple Factory
+- SRP is also an example of Inversion of Control
+- IOC can be implemented by Factory Pattern, SRP, events or delegates
+- IDiscount doesnt have much aggregation. Its simple
+- Consider ICustomer interface which has relationship with IAddress
+- Then we have to create a customer inside a factory class with different types of IAddresses
+- What if ICustomer has a dependency on IPhoneType whether it is office or home phone
+- We will have to create different permutations and combinations of the customer inside a factory
+
+```c#
+public static ICustomer CreateCustomer(int type)
+        {
+            if (type == 0)
+            {
+                var homeAddress = new HomeAddressImpl();
+                homeAddress.City = "Chandigarh";
+                Customer customer = new Customer
+                {
+                    AddressList = new List<IAddress>() { homeAddress }
+                };
+
+            }
+            else if (type == 1) 
+            {
+                var officeAddress = new OfficeAddressImpl();
+                officeAddress.City = "Delhi";
+                Customer customer = new Customer
+                {
+                    AddressList = new List<IAddress>() { officeAddress }
+                };
+
+            }
+            else if (type == 2)
+            {
+                var officeAddress = new OfficeAddressImpl();
+                officeAddress.City = "Delhi";
+                CustomerVIP customer = new CustomerVIP
+                {
+                    AddressList = new List<IAddress>() { officeAddress }
+                };
+
+            }
+
+            return new NormalCustomer2();
+        }
+
+```
+
+***To simplify it we use Dependency Injection***
+
+- Lot of developers use Constructor Injection either Property Based or Method Based Injection
+- Inject dependent objects from outside
+
+```c#
+//Pass the context into the constructor
+public BaseCustomer(IAddress i)
+        {
+            AddressList = new List<IAddress> { i };
+        }
+```
+
+***Dependency Injection(not a pattern) is a style where dependent objects are injected through constructor or property***
+- Main Class points to an abstraction
+
+***Dependency Injection implements Dependency Inversion***
+
+- Service Locator is similar to simple factory pattern
+- It is concerned with Networking where a call to WCF service is made(API call across the internet)
+- Used like this: DBClientFactory<WorkHeadRepo>.Instance.getWorkOrderYear(appSettings.Value.DefaultConnection)
+- Isnt it similar to SimpleFactory.Create(1)
+
+### Domain Driven Development
+
+- Emphasizes Object Oriented Programming(Think like real world objects)
+- Follow the Domain (model the real world domain and keep same names or ubiquitous language)
+- Conceptualized by Eric Evans
+- DDD says there are 3 kinds of classes: Entity Class(Customer, Employee, Supplier), Service(or Technical) Class(Data Access Layer, Repositories,WebApi, Caching, Validation), Value Object Class(Date,Money)
+- Service classes are common for all entities and are cross-cutting
+- Value Object classes are neither Services or Entities like Date Class, Money class
+
+```c#
+Date d = new Date("1/1/2010");
+Date d1 = new Date("January 1 2010");
+d = d1;
+
+Money m = new Money(D,1);
+Money m1 = new Money(Rs,75);
+m == m1
+```
+- Value objects are rarely created, compare based on value. They are not modified once they are created
+- Everyone should use DDD
+- Value objects we need to code something extra
+- Equals(), ===,!== should be overidden
+- GetHashCode() should also be overidden
+- When objects are stored in a Dictionary, they are looked up using a hash
+- Every object is assigned a different hashcode(obj.GetHashCode())
+- We need to override the GetHashCode() method and generate hashcode based on the amount only
+
+```c#
+Customer c = new Customer();
+c.Name = "Nishant";
+Customer c2 = new Customer();
+c2.Name = "Nishant";
+
+Console.WriteLine(c == c1);//Returns false
+//Nishant can be from Delhi or he can be from Chandigarh
+//They are different Entity Objects
+
+
+//Example of Value Object
+public class CustMoney 
+{
+    public string PaymentType {get;set;}
+    public decimal Amount {get;set;}
+
+    //Override the Equals Method
+    public override bool Equals(object obj)
+    {
+        return this.Amount == (CustMoney)obj.Amount;
+    }
+
+    //Alternatively Use operator overloading
+    public static bool operator ==(CustMoney objA, CustMoney objA)
+    {
+        return objA.Amount == objB.Amount;
+    }
+
+    public static bool operator !=(CustMoney objA, CustMoney objA)
+    {
+        return objA.Amount != objB.Amount;
+    }
+
+    //Dont use whole object to generate hashcode, just use the Amount
+    public override int GetHashCode
+    {
+        return this.Amount.HashCode;
+    }
+}
+
+CustMoney m1 = new CustMoney();
+m1.Amount = 100;
+m1.PaymentType = "Cash"
+
+CustMoney m2 = new CustMoney();
+m2.Amount = 100;
+m2.PaymentType = "Credit Card"
+
+Console.WriteLine(m1.Equals(m2));//Returns true since we are comparing by Amount
+
+Dictionary<CustMoney,CustMoney> custMoneyList = new Dictionary<CustMoney,CustMoney>();
+custMoneyList.Add(m1,m1);
+
+//since m1 and m2 are equal we can lookup m1 using m2
+//In reality we get an exception
+//If we make them equal by hashcode based on amount, it will work fine
+//Leads to a question, if the developer passes any number it will work, so it is not so smart after all.
+//Can cause hash collisions
+var t = custMoneyList[m2];
+```
+
+
+# Aggregate Root (Design Pattern): Helps us to maintain integrity of the object by going through the root(or parent object)
+
+```c#
+
+interface ICustomer 
+{
+    string Name {get;set;}
+    List<IAddress> Addresses {get;set;}
+}
+
+public class Customer : ICustomer
+{
+    public List<IAddress> Addresses {get;set;}
+
+    public string Name {get;set;}
+}
+
+static void Main(string[] args)
+{
+    Customer c = new Customer();
+    c.Addresses.Add(new HomeAddress());
+    c.Addresses.Add(new OfficeAddress());
+}
+
+```
+
+- In the below example, dont allow adding Addresses directly by exposing List<IAddresses>()
+- Add the Address through the Aggregate Root
+- Aggregate root = gatekeeper of the aggregate, ensuring order, consistency, and integrity.
+- Helps to main integrity in the Entity Object
+- Main Drawback is Customer Class gets overloaded.
+- Modify the above code as follows:
+
+```c#
+interface ICustomer 
+{
+    string Name {get;set;}
+    void Add(IAddress address);
+}
+
+public class Customer : ICustomer
+{
+    private List<IAddress> Addresses {get;set;}
+
+    public string Name {get;set;}
+
+    public void Add(IAddress address)
+    {
+        foreach(var item in Addresses)
+        {
+            if(item.GetType()==typeof(address))
+            {
+                throw new Exception("Type of Address already exists");
+            }
+            else 
+            {
+                this.Addresses.Add(address);
+            }
+        }
+    }
+}
+
+```
+
+***One way to decide whether it is a design pattern or architecture style, there should be some pseudo code***
+
+### Structs in C# compare based on value. Can we use Structs in place of Value Object classes.
+- Some limitations like EF Support, Inheritance force us to create a class
+- if it is a simple comparison, we can use structs but for complex objects, struct will not work.
+

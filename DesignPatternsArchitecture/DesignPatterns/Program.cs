@@ -17,3 +17,16 @@ read.Read();
 //Enquiry Customer is not buying anything, no need for Amount property
 //cust3.Amount will throw an exception
 //cust3.Amount
+
+//IDiscount discount = new AgeDiscount();
+IDiscount disount = new DiscountRegion();
+IDiscount discount2 = SimpleFactory.CreateDiscount(2);
+discount2.Calculate(cust);
+
+ICustomer customer = SimpleFactory.CreateCustomer(0);
+
+//CustomerRating rating = new CustomerRating();
+//rating.Rating = 100;
+
+IRepository<Customer> dbCust = null;
+dbCust.Save(new Customer());
