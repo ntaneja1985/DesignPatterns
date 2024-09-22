@@ -10,3 +10,10 @@ x.CalculateDiscount();
 ICustomer cust = new NormalCustomer(new Rating());
 cust = new CustomerAgeType();
 
+
+ICustomer cust3 = new EnquiryCustomer();
+IRepositoryRead read = new Repository();
+read.Read();
+//Enquiry Customer is not buying anything, no need for Amount property
+//cust3.Amount will throw an exception
+//cust3.Amount

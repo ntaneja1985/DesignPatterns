@@ -16,10 +16,26 @@ namespace DesignPatterns
             decimal Amount { get; set; }
 
             decimal Rating { get; set; }
+
+            //Wrong, not job of customer to calculate discount. Violates SRP
             decimal CalculateDiscount();
             List<IAddress> Addresses();
         }
-        interface IProduct
+        interface IAddress2
+        {
+
+        }
+        interface HomeAddress: IAddress2
+        {
+
+        }
+
+        interface OfficeAddress: IAddress2
+        {
+
+        }
+
+    interface IProduct
         {
 
         }
@@ -47,6 +63,7 @@ namespace DesignPatterns
         }
         interface IDiscount
         {
+            //string DiscountType { get;set; }
             decimal Calculate(ICustomer customer);
 
         }
@@ -55,6 +72,18 @@ namespace DesignPatterns
     {
         string Name { get; set; }
         string Age { get; set; }
+    }
+
+    interface IRepository: IRepositoryRead
+    {
+        void Add();
+        void Update();
+        void Delete();
+    }
+
+    interface IRepositoryRead
+    {
+        void Read();
     }
 
 }
