@@ -615,6 +615,7 @@ public BaseCustomer(IAddress i)
 - DDD says there are 3 kinds of classes: Entity Class(Customer, Employee, Supplier), Service(or Technical) Class(Data Access Layer, Repositories,WebApi, Caching, Validation), Value Object Class(Date,Money)
 - Service classes are common for all entities and are cross-cutting
 - Value Object classes are neither Services or Entities like Date Class, Money class
+- Related to Onion Architecture where everything depends on the entity
 
 ```c#
 Date d = new Date("1/1/2010");
@@ -766,4 +767,186 @@ public class Customer : ICustomer
 ### Structs in C# compare based on value. Can we use Structs in place of Value Object classes.
 - Some limitations like EF Support, Inheritance force us to create a class
 - if it is a simple comparison, we can use structs but for complex objects, struct will not work.
+
+## Bounded Context
+- A bounded context is like a fenced-off area within your software where specific terms and rules apply consistently. It's where a shared understanding—the Ubiquitous Language—exists. Inside this boundary, everyone agrees on what things mean.
+- Outside the boundary, in another bounded context, the same terms might take on different meanings. Think of it as having different dictionaries for different parts of your application.
+- Bounded contexts allow us to:
+    1. Keep things organized: Each context focuses on a specific domain or subdomain (e.g., orders, payments, customers).
+    2. Avoid misunderstandings: Inside a context, terms mean the same thing to everyone.
+    3. Encourage loose coupling: By keeping contexts separate, we prevent unnecessary dependencies.
+
+
+## Context Map
+
+1. The context map is where the magic happens. 
+2. It's a visual representation of how these bounded contexts interact with each other. Think of it as a subway map connecting different lines (contexts). Some lines intersect, some run parallel, and some are express trains hurtling through the night. The context map ensures they all play nice and have the right contact points.
+3. Shared Kernel: Sometimes, two contexts need to hold hands and share a little code. It’s like when Batman teams up with Superman—except with fewer capes. The shared kernel allows them to collaborate without stepping on each other’s toes.
+4. Customer-Supplier Relationship: One context might provide services to another. It’s like the local bakery supplying fresh baguettes to the café next door. In DDD, we call this a customer-supplier relationship. No invoices involved, though.
+5. Conformist: Some contexts are rule followers—they conform to the rules set by another context. It’s like a teenager reluctantly following curfew because their parents said so. These conformist contexts adapt to maintain harmony.
+6. Anticorruption Layer: Imagine a translator at the United Nations. The anticorruption layer ensures that when Context A speaks Klingon, Context B understands it in plain English. It shields your precious domain model from foreign invaders.
+7. Open Host Service: This is like throwing a neighborhood block party. One context opens up its services to others. It's all about sharing the love (and endpoints).
+8. Published Language: When contexts need to gossip, they use a common dictionary—the published language. It’s like having a secret codebook for spies. 
+
+# Iterator Pattern
+
+- Whenever we' re dealing with collections and need to iterate through their elements sequentially, consider the Iterator Design Pattern.
+- It's especially handy when you want to keep your client code decoupled from the specifics of the collection implementation
+
+```c#
+
+var employees = new List<Employee>
+{
+    new Employee("Alice"),
+    new Employee("Bob"),
+    new Employee("Charlie")
+    // ... more employees
+};
+
+foreach (var employee in employees)
+{
+    Console.WriteLine($"Employee: {employee.Name}");
+}
+
+
+```
+
+- Behind the scenes, the foreach loop uses an iterator to access each employee sequentially. But as a developer, you don't need to worry about how it's happening; you just focus on the high-level logic
+- The Iterator Design Pattern allows sequential access to the elements of an aggregate object (i.e., a collection) without exposing how those elements are stored internally
+- It provides a uniform interface for traversing different data structures. So whether you’re dealing with a List, an ArrayList, or an Array, you can use the same approach to iterate through their elements
+- The main idea is to separate the iteration logic from the collection object itself.
+- IEnumerable<T> helps us to iterate through a collection. Internally it uses IEnumerator.
+- IEnumerable<T> doesnot have an add method, it only helps us to iterate over an object, helps us to maintain the sanctity of the object
+
+
+## If we have an aggregate root, we will always have iterator pattern attached to it. Clone for maintaining integrity.
+- Say if Customer Class is an aggregate root, it will implement iterator pattern to loop through the list of addresses.
+
+```c#
+
+public class Customer 
+{
+    public IEnumerable<Address> Addresses 
+    {
+        get 
+        {
+            return _addresses;
+        }
+    }
+}
+
+public class Breaker 
+{
+    public void BreakIt()
+    {
+        var cust = new Customer();
+        //This is valid code but it should not be happening
+        var addresses = (List<Address>) customer.Addresses;
+        addresses.Add(new HomeAddress());
+        addresses.Add(new HomeAddress());
+    }
+
+}
+
+//To fix the Breaker add a method Add() to Customer
+
+public void Add(IAddress addr)
+{
+    foreach(var item in this.Addresses)
+    {
+        if(addr.GetType()==typeof(HomeAddress))
+        {
+            throw new Exception("Not Allowed");
+        }
+    }
+    this.Addresses.Add(addr);
+}
+
+
+```
+
+## Please note Iterator pattern is an overkill for basic collections like Arrays and Lists
+- It only supports forward traversal of elements rather than backend traversal or random access
+- Iterator also impact performance
+
+## Biggest advantage of iterator pattern is adaptability and flexibility
+- Clients (that's you, the developer) can traverse collections without caring about the nitty-gritty details. 
+- You don't need to know whether it's an array, a linked list, or a mystical data structure from the future. Just grab that iterator and start exploring!
+
+### Aggregate root makes our code complex. It overloads the root object.
+- For iterating through aggregate root, we need iterator pattern. Clone it for maintaining integrity.
+
+## Anti-corruption layer is used with legacy applications
+- Used for adding new features into legacy applications
+- How to share data between services: shared class, web api, queue
+
+# Bridge Pattern
+
+- The Bridge Design Pattern is all about decoupling an abstraction from its implementation. 
+- Imagine you have this fancy abstraction (let's call it "Abstractionville") that wants to do some cool stuff, but it doesn't want to be tied down to a specific implementation. It's like Abstractionville wants to date around without committing to anyone—very modern, I must say!
+
+- Bridge splits things into two parts:
+
+1. Abstraction: This is the high-level stuff—the part that Abstractionville interacts with. It's like the front-end of your app, blissfully unaware of the nitty-gritty details.
+2. Implementation: This is where the real action happens—the back-end. It's like the engine room of a spaceship. The Implementation part handles the actual work, but it doesn't care about Abstractionville's drama. It's stoic like that.
+
+```c#
+
+// Abstraction
+public abstract class MessageSender
+{
+    public abstract void SendMessage(string message);
+}
+
+// Implementers
+public class EmailSender : MessageSender
+{
+    public override void SendMessage(string message)
+    {
+        // Send email logic here
+        Console.WriteLine($"Sending email: {message}");
+    }
+}
+
+public class SMSSender : MessageSender
+{
+    public override void SendMessage(string message)
+    {
+        // Send SMS logic here
+        Console.WriteLine($"Sending SMS: {message}");
+    }
+}
+
+// Client code
+var emailSender = new EmailSender();
+var smsSender = new SMSSender();
+
+emailSender.SendMessage("Hello, world!");
+smsSender.SendMessage("Hey there, Copilot!");
+
+// Abstraction and Implementation are happily decoupled!
+
+
+```
+
+### When to use Bridge Pattern
+-When to Use It: Whenever you find yourself juggling different implementations for the same abstraction—like choosing between pizza toppings without committing to just one. 
+
+### Abstraction is also like our interface: ICustomer
+- For example, we need to validate our customer differently in different scenarios
+- Solution is to create a new interface IValidateCustomer and with a Validate() method
+- Now create classes that implement IValidateCustomer and implement the Validate method
+- Extension of Single Responsibility Pattern(SRP)
+
+```c#
+Customer c = new Customer();
+IValidateCustomer valid = new ValidationWithName();
+valid.Validate(c);
+
+```
+
+Basic example of Aggregation,Composition and Association
+- Nishant has a shirt (they can exist independently)-->Aggregation
+- Nishant has a heart (they need each other for existence) -->Composition
+- Nishant knows his neighbours(there is a thin relationship) -->Association(usually through constructor)
 
