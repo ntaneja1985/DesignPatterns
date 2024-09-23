@@ -293,7 +293,7 @@ In this example:
 
 - We create instances of Rectangle and Circle.
 - We treat them both as Shape objects.
-- The LSP ensures that substituting a Rectangle or a Circle for a Shape doesn’t break the program. The behavior (calculating the area) remains consistent.
+- The LSP ensures that substituting a Rectangle or a Circle for a Shape doesn't break the program. The behavior (calculating the area) remains consistent.
 - Remember, adhering to the LSP helps maintain a robust and predictable class hierarchy, making it easier to reason about your code and preventing unexpected surprises when swapping objects.
 
 ## I --> Interface Segregation Principle
@@ -501,7 +501,7 @@ IDiscount discount = Someone.Create(1);
 ```
 
 - Think of it this way, imagine a factory that takes the same input of wood and creates table,chair,sofa,bed etc.
-- It’s like having a customizable assembly line for creating objects
+- It's like having a customizable assembly line for creating objects
 
 ```c#
 internal static class SimpleFactory
@@ -769,7 +769,7 @@ public class Customer : ICustomer
 - if it is a simple comparison, we can use structs but for complex objects, struct will not work.
 
 ## Bounded Context
-- A bounded context is like a fenced-off area within your software where specific terms and rules apply consistently. It's where a shared understanding—the Ubiquitous Language—exists. Inside this boundary, everyone agrees on what things mean.
+- A bounded context is like a fenced-off area within your software where specific terms and rules apply consistently. It's where a shared understanding the Ubiquitous Language exists. Inside this boundary, everyone agrees on what things mean.
 - Outside the boundary, in another bounded context, the same terms might take on different meanings. Think of it as having different dictionaries for different parts of your application.
 - Bounded contexts allow us to:
     1. Keep things organized: Each context focuses on a specific domain or subdomain (e.g., orders, payments, customers).
@@ -781,12 +781,12 @@ public class Customer : ICustomer
 
 1. The context map is where the magic happens. 
 2. It's a visual representation of how these bounded contexts interact with each other. Think of it as a subway map connecting different lines (contexts). Some lines intersect, some run parallel, and some are express trains hurtling through the night. The context map ensures they all play nice and have the right contact points.
-3. Shared Kernel: Sometimes, two contexts need to hold hands and share a little code. It’s like when Batman teams up with Superman—except with fewer capes. The shared kernel allows them to collaborate without stepping on each other’s toes.
-4. Customer-Supplier Relationship: One context might provide services to another. It’s like the local bakery supplying fresh baguettes to the café next door. In DDD, we call this a customer-supplier relationship. No invoices involved, though.
-5. Conformist: Some contexts are rule followers—they conform to the rules set by another context. It’s like a teenager reluctantly following curfew because their parents said so. These conformist contexts adapt to maintain harmony.
+3. Shared Kernel: Sometimes, two contexts need to hold hands and share a little code. It's like when Batman teams up with Superman—except with fewer capes. The shared kernel allows them to collaborate without stepping on each other's toes.
+4. Customer-Supplier Relationship: One context might provide services to another. It's like the local bakery supplying fresh baguettes to the café next door. In DDD, we call this a customer-supplier relationship. No invoices involved, though.
+5. Conformist: Some contexts are rule followers—they conform to the rules set by another context. It's like a teenager reluctantly following curfew because their parents said so. These conformist contexts adapt to maintain harmony.
 6. Anticorruption Layer: Imagine a translator at the United Nations. The anticorruption layer ensures that when Context A speaks Klingon, Context B understands it in plain English. It shields your precious domain model from foreign invaders.
 7. Open Host Service: This is like throwing a neighborhood block party. One context opens up its services to others. It's all about sharing the love (and endpoints).
-8. Published Language: When contexts need to gossip, they use a common dictionary—the published language. It’s like having a secret codebook for spies. 
+8. Published Language: When contexts need to gossip, they use a common dictionary—the published language. It's like having a secret codebook for spies. 
 
 # Iterator Pattern
 
@@ -813,7 +813,7 @@ foreach (var employee in employees)
 
 - Behind the scenes, the foreach loop uses an iterator to access each employee sequentially. But as a developer, you don't need to worry about how it's happening; you just focus on the high-level logic
 - The Iterator Design Pattern allows sequential access to the elements of an aggregate object (i.e., a collection) without exposing how those elements are stored internally
-- It provides a uniform interface for traversing different data structures. So whether you’re dealing with a List, an ArrayList, or an Array, you can use the same approach to iterate through their elements
+- It provides a uniform interface for traversing different data structures. So whether you're dealing with a List, an ArrayList, or an Array, you can use the same approach to iterate through their elements
 - The main idea is to separate the iteration logic from the collection object itself.
 - IEnumerable<T> helps us to iterate through a collection. Internally it uses IEnumerator.
 - IEnumerable<T> doesnot have an add method, it only helps us to iterate over an object, helps us to maintain the sanctity of the object
