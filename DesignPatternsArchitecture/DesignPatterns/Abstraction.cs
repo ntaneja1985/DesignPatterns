@@ -75,20 +75,20 @@ namespace DesignPatterns
         string Age { get; set; }
     }
 
-    interface IRepository: IRepositoryRead
-    {
-        void Add();
-        void Update();
-        void Delete();
-    }
+    //interface IRepository: IRepositoryRead
+    //{
+    //    void Add();
+    //    void Update();
+    //    void Delete();
+    //}
 
     interface IRepositoryRead
     {
         void Read();
     }
 
-    public interface IRepository<T>
-    {
-        void Save (T entity);
-    }
+    //public interface IRepository<T>
+    //{
+    //    void Save (T entity);
+    //}
 }

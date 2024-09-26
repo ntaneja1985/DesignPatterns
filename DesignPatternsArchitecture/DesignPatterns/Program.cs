@@ -12,8 +12,8 @@ cust = new CustomerAgeType();
 
 
 ICustomer cust3 = new EnquiryCustomer();
-IRepositoryRead read = new Repository();
-read.Read();
+//IRepositoryRead read = new Repository();
+//read.Read();
 //Enquiry Customer is not buying anything, no need for Amount property
 //cust3.Amount will throw an exception
 //cust3.Amount
@@ -28,5 +28,30 @@ ICustomer customer = SimpleFactory.CreateCustomer(0);
 //CustomerRating rating = new CustomerRating();
 //rating.Rating = 100;
 
-IRepository<Customer> dbCust = null;
-dbCust.Save(new Customer());
+//IRepository<Customer> dbCust = null;
+//dbCust.Save(new Customer());
+
+Customer c = new Customer();
+IRepository<Customer> rep = FactoryRepository<Customer>.Create();
+rep.Add(c);
+rep.Save(c);
+
+Supplier supplier = new Supplier();
+IRepository<Supplier> sup = FactoryRepository<Supplier>.Create();
+sup.Add(supplier);
+sup.Save(supplier);
+
+var generics = new Generics();
+Console.WriteLine(generics.Compare<string>("test", "test"));
+
+IExport e = new ExcelExport();
+e.Export();
+e = new WordExport();
+e.Export();
+//Use the Pdf Adapter using object adapter
+IExport e2 = new PdfObjectAdapter();
+e2.Export();
+//Use the Pdf Adapter using class adapter
+IExport e3 = new PdfClassAdapter();
+e3.Export();
+

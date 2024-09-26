@@ -950,3 +950,203 @@ Basic example of Aggregation,Composition and Association
 - Nishant has a heart (they need each other for existence) -->Composition
 - Nishant knows his neighbours(there is a thin relationship) -->Association(usually through constructor)
 
+# Repository Pattern
+
+- In DDD, we have Entity Classes, Service Classes and Value Objects
+- Primary purpose is to abstract and encapsulate the data access layer
+- Provides clean separation between business logic and the underlying data storage
+
+Before we explore the pattern, let's understand the problem it aims to solve. Imagine you're building a modern data driven application that needs to access data from a database (like SQL Server). The straightforward approach would be to write all the data access-related code directly within your application's controllers or services. For instance, if you're using Entity Framework, your controller might directly interact with the data context class and execute queries against the database.
+
+However, this approach has drawbacks:
+
+1. Code Duplication: If you have multiple controllers or services that manipulate the same data (e.g., an Employee entity), you’ll end up duplicating the data access code. Any changes to this logic would require updates in multiple places.
+2. Tight Coupling: Embedding data access logic directly in controllers tightly couples them to the database implementation. This makes your code less maintainable and harder to test.
+
+## Implementation of Repository Pattern
+```c#
+
+  public interface IRepository<T> where T : class
+    {
+        //Add to memory
+        bool Add(T entity);    
+        //Save to database
+        bool Save(T obj);
+        IEnumerable<T> GetAll();
+        IEnumerable<T> Search(int id);
+    }
+
+    public abstract class RepositoryBase<T> : IRepository<T> where T: class
+    {
+        public List<T> list { get; set; } = new List<T>();
+
+        public bool Add(T entity)
+        {
+            list.Add(entity);
+            return true;
+        }
+
+        public abstract IEnumerable<T> GetAll();
+
+        public abstract bool Save(T obj);
+
+        public abstract IEnumerable<T> Search(int id);
+        
+    }
+    public class RepositoryCustomer : RepositoryBase<Customer>
+    {
+        public override IEnumerable<Customer> GetAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool Save(Customer obj)
+        {
+            //code for ef core to save to DB
+            return true;
+        }
+
+        public override IEnumerable<Customer> Search(int id)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    //We can use the same factory to create a customer or supplier
+    public static class FactoryRepository<T> where T: class
+    {
+        public static IRepository<T> Create()
+        {
+            if(typeof(T).ToString()=="Customer")
+            {
+                return (IRepository<T>)new RepositoryCustomer();
+            }
+            return null;
+        }
+    }
+
+
+    //Implementation in Program.cs
+
+    Customer c = new Customer();
+    IRepository<Customer> rep = FactoryRepository<Customer>.Create();
+    rep.Add(c);
+    rep.Save(c);
+
+    //Can do similar for supplier
+    Supplier supplier = new Supplier();
+    IRepository<Supplier> sup = FactoryRepository<Supplier>.Create();
+    sup.Add(supplier);
+    sup.Save(supplier);
+
+```
+- Injection of DI is static in nature
+- We can do DI injection using constructor injection
+- Factory pattern can provide instance based on service locator, dropdown selection or any other condition
+- Generics help to decouple datatype from logic
+
+```c#
+public bool Compare(int num1, int num2) 
+        {
+            return num1 == num2;
+        
+        }
+
+        public bool Compare(string str1, string str2)
+        {
+            return str1 == str2;
+        }
+
+        public bool Compare<T>(T obj1, T obj2)
+        {
+            return obj1.Equals(obj2);
+        }
+
+```
+
+# Adapter Pattern
+- Adapter Design Pattern is a structural pattern that allows objects with incompatible interfaces to work together. 
+- Imagine you have two systems or classes—let's call them System A and System B. They need to collaborate, but their interfaces don't match. The adapter acts as a bridge between them, making communication possible.
+- It acts like a wrapper
+- Adapter pattern is a wrapper on top of objects or classes that cannot be modified: they can be third party or internal objects and classes
+- 2 types of adapters: Object Adapter and Class Adapter
+- Most used one is the Object Adapter
+- In ADO.NET, we use Repository Pattern which internally used Adapter Pattern
+- Lets say we have a Save() method in Repository, we now need to make it work with EFCore and ADO.NET
+- ADO.NET may use a different method to Save() like cmd.ExecuteNonQuery()
+- We then make a adapter inside our IRepository for Save() method and internally call cmd.ExecuteNonQuery() in its implementation
+- Adapter handles the necessary transformations and ensures compatibility
+
+```c#
+public interface IExport
+    {
+        void Export();
+    }
+    public class WordExport : IExport
+    {
+        public void Export()
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class ExcelExport : IExport
+    {
+        public void Export()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
+    //Third Party DLL
+    //Incompatible with IExport interface
+    public class PdfExport
+    {
+        public void Save()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    //We need to make PdfExport work with IExport interface
+    //Object Adapter
+    //Make a call to instance of Pdf Export class
+    //Wrapper
+    public class PdfObjectAdapter : IExport
+    {
+        //Internally it calls save
+        public void Export()
+        {
+            PdfExport c = new PdfExport();
+            c.Save();
+        }
+    }
+
+    //Class Adapter using inheritance
+    public class PdfClassAdapter : PdfExport, IExport
+    {
+        public void Export()
+        {
+            this.Save();
+        }
+    }
+
+
+    //Usage
+
+    IExport e = new ExcelExport();
+    e.Export();
+    e = new WordExport();
+    e.Export();
+    //Use the Pdf Adapter using object adapter
+    IExport e2 = new PdfObjectAdapter();
+    e2.Export();
+    //Use the Pdf Adapter using class adapter
+    IExport e3 = new PdfClassAdapter();
+    e3.Export();
+
+```
+
+# CQRS: Command Query Responsibility Segregation
+- Divide your classes into 2: Create/Update/Delete Classes and Query Classes
+- Establish bounded context, CreateCustomer() is different from GetCustomer()

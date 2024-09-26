@@ -254,28 +254,28 @@ namespace DesignPatterns
         public override List<IAddress> Addresses { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
-    public class Repository : IRepository
-    {
-        public void Add()
-        {
-            throw new NotImplementedException();
-        }
+    //public class Repository : IRepository
+    //{
+    //    public void Add()
+    //    {
+    //        throw new NotImplementedException();
+    //    }
 
-        public void Delete()
-        {
-            throw new NotImplementedException();
-        }
+    //    public void Delete()
+    //    {
+    //        throw new NotImplementedException();
+    //    }
 
-        public void Read()
-        {
-            throw new NotImplementedException();
-        }
+    //    public void Read()
+    //    {
+    //        throw new NotImplementedException();
+    //    }
 
-        public void Update()
-        {
-            throw new NotImplementedException();
-        }
-    }
+    //    public void Update()
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //}
 
     public class Reporting : IRepositoryRead
     {
@@ -288,6 +288,14 @@ namespace DesignPatterns
     public class CustomerRating
     {
         public int Rating { get; set; }
+    }
+
+    public class Supplier : ISupplier
+    {
+        public List<IAddress> Addresses()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 
