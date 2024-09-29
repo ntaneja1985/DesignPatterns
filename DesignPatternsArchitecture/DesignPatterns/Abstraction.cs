@@ -16,6 +16,7 @@ namespace DesignPatterns
             decimal Amount { get; set; }
 
             decimal Rating { get; set; }
+            int NumberOfVisit { get; set; } //Reporting field, needed in read not in create/update
 
             //Wrong, not job of customer to calculate discount. Violates SRP
             decimal CalculateDiscount();

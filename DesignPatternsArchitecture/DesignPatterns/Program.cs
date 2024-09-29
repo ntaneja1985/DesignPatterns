@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using DesignPatterns;
+using static DesignPatterns.IEvent;
 
 Console.WriteLine("Hello, World!");
 
@@ -54,4 +55,34 @@ e2.Export();
 //Use the Pdf Adapter using class adapter
 IExport e3 = new PdfClassAdapter();
 e3.Export();
+
+Customer customer2 = new Customer();
+customer2.Name = "Nishant";
+IRepository<Customer> repo2 = null;//Repo EF, Repo ADO, Repo File
+repo2.Save(customer2);
+
+
+//Created in the Post Method
+var createCustomer = new CreateCustomerCommand();
+createCustomer.Name = "Test";
+//Handler is the mediator
+var handler = new CreateCustomerCommandHandler();
+handler.Execute(createCustomer);
+
+//Using the Facade Pattern
+var accounting = new Accounting();
+var billing = new Billing();
+BillingFacade billingFacade = new BillingFacade(accounting,billing);
+billingFacade.StartBilling();
+
+CustomerType custType = new GoldCustomer();
+//Wrong
+CustomerType custType2 = SimpleFactoryCustomerType.Create(0);
+//Right
+CustomerType custType3 = CustomerTypeFactory.GetCustomerType(1);
+
+
+
+
+
 

@@ -1150,3 +1150,423 @@ public interface IExport
 # CQRS: Command Query Responsibility Segregation
 - Divide your classes into 2: Create/Update/Delete Classes and Query Classes
 - Establish bounded context, CreateCustomer() is different from GetCustomer()
+- When we design interfaces we run into situations that we need certain fields during the READ part and not necessarily during the INSERT/UPDATE part.
+- For example, we may want to lookup number of visits of customer(computed value) during the read part, but in write part we may not need it
+- This can make our interface and inheriting classes bulky and difficult to maintain
+- One Solution is to make DTOs i.e we make a new class which only contains the fields we wish to read
+- Sticking to reusability too much can lead to complicated classes which violate SRP principle
+- Solution is CQRS, separate out the classes meanT for reporting(QUERY) and those required for INSERT/UPDATE/DELETE
+- CQRS is a design pattern
+- CQRS is a good pattern for doing transactions between systems-->makes it valuable for designing microservices
+- Please note Model and Command class is not the same
+- Command is an action like insert/update/delete
+- On the other hand Model represents a real world entity like Customer or Supplier
+- Along with a command we also have a handler
+- Handler is like a mediator
+- Base of CQRS comes from few GoF patterns
+- One is Command Pattern
+
+```c#
+public interface ICommand
+    {
+        Guid Id { get; set; }
+    }
+    public interface ICommandHandler<T> where T : ICommand
+    {
+        bool Execute(T command); 
+    }
+
+    public interface IQuery<T> where T : class
+    {
+
+    }
+    //Mediator
+    public class CreateCustomerCommandHandler : ICommandHandler<CreateCustomerCommand> 
+    { 
+        public bool Execute(CreateCustomerCommand command)
+        {
+            //repo.save
+            //event sourcing
+            //send events to other microservices using service bus
+            return true;
+        }
+    }
+
+```
+
+## Command Design Pattern
+- Actions can also be classes
+
+```c#
+// Command interface
+public interface ICommand
+{
+    void Execute();
+}
+
+// Concrete command: PrepareDishCommand
+public class PrepareDishCommand : ICommand
+{
+    private readonly Chef _chef;
+
+    public PrepareDishCommand(Chef chef)
+    {
+        _chef = chef;
+    }
+
+    public void Execute()
+    {
+        _chef.PrepareDish();
+    }
+}
+
+// Concrete command: ServeCustomerCommand
+public class ServeCustomerCommand : ICommand
+{
+    private readonly Waiter _waiter;
+
+    public ServeCustomerCommand(Waiter waiter)
+    {
+        _waiter = waiter;
+    }
+
+    public void Execute()
+    {
+        _waiter.ServeCustomer();
+    }
+}
+
+// Receiver: Chef
+public class Chef
+{
+    public void PrepareDish()
+    {
+        Console.WriteLine("Chef is preparing a delicious dish.");
+    }
+}
+
+// Receiver: Waiter
+public class Waiter
+{
+    public void ServeCustomer()
+    {
+        Console.WriteLine("Waiter is serving the customer.");
+    }
+}
+
+// Invoker: Waiter
+public class WaiterInvoker
+{
+    private ICommand _command;
+
+    public void SetCommand(ICommand command)
+    {
+        _command = command;
+    }
+
+    public void ExecuteCommand()
+    {
+        _command.Execute();
+    }
+}
+
+// Usage
+var chef = new Chef();
+var waiter = new Waiter();
+
+var prepareDishCommand = new PrepareDishCommand(chef);
+var serveCustomerCommand = new ServeCustomerCommand(waiter);
+
+var waiterInvoker = new WaiterInvoker();
+waiterInvoker.SetCommand(prepareDishCommand);
+waiterInvoker.ExecuteCommand(); // Chef prepares dish
+
+waiterInvoker.SetCommand(serveCustomerCommand);
+waiterInvoker.ExecuteCommand(); // Waiter serves customer
+
+
+```
+***MediatR is a nuget package which creates mappings: for example for create customer command invoke the create customer handler***
+- It is an orchestrator and handles mapping between command and its handler
+
+## Mediator Pattern
+- Behavioural Design Patterns
+- Its primary goal is to reduce the complexity of communication between multiple objects by introducing a mediator: a central hub that handles interactions among these objects.
+- Think of a Facebook group. Members don't directly message each other: they post in the group, and the group handles distribution. Similarly, in software, the mediator coordinates interactions.
+- Mediator Class acts like a traffic police
+- Lets say we have an accounting application, an inventory application and billing application. If we call class billing it needs to make an entry into accounting or inventory needs to talk to accounting and billing
+- This interaction becomes complex very quickly
+- So we introduce a mediator in-between them
+- Register all the classes inside an mediator. For each of the classes, define a handler
+- Mediator will invoke handlers of those classes which are called
+- CQRS is a combination of command pattern and mediator pattern
+
+## Facade Pattern
+- Structural design pattern
+- What if we have a complex system with several subsystems
+- This pattern provides a simplified interface or facade for interacting with that complex system
+- This is especially useful when we have a complex system with many interdependent classes
+- Take the example of Home Theatre System
+- A home theatre system has a DVD Player, a Projector, Sound System and Lights
+- Rather than having the user interact with each of these system directly, we can provide a HomeTheatreFacade which will just expose 2 simple methods: Watch Movie and End Movie
+- The WatchMovie() method will take case of the complex interactions such as starting the projector, dimming the lights, firing up the sound system etc.
+- Same goes for EndMovie() method which will switch off the projector, switch the lights back on and turn off the sound system
+
+## Facade Pattern is different from Adapter Pattern
+- Adapter pattern is used when we have incompatible interfaces (remember pdfexport, word export example)
+- Facade pattern is simply used to simplify the interaction with a complex subsystem
+
+```c#
+\\Components of the Home Theatre System
+public class DVDPlayer
+{
+    public void On() => Console.WriteLine("DVD Player is On");
+    public void Play(string movie) => Console.WriteLine($"Playing {movie}");
+    public void Off() => Console.WriteLine("DVD Player is Off");
+}
+
+public class Projector
+{
+    public void On() => Console.WriteLine("Projector is On");
+    public void Off() => Console.WriteLine("Projector is Off");
+}
+
+public class SoundSystem
+{
+    public void On() => Console.WriteLine("Sound System is On");
+    public void SetVolume(int level) => Console.WriteLine($"Setting volume to {level}");
+    public void Off() => Console.WriteLine("Sound System is Off");
+}
+
+public class Lights
+{
+    public void Dim(int level) => Console.WriteLine($"Dimming lights to {level}%");
+}
+
+\\Facade Class
+public class HomeTheaterFacade
+{
+    private readonly DVDPlayer _dvdPlayer;
+    private readonly Projector _projector;
+    private readonly SoundSystem _soundSystem;
+    private readonly Lights _lights;
+
+    public HomeTheaterFacade(DVDPlayer dvdPlayer, Projector projector, SoundSystem soundSystem, Lights lights)
+    {
+        _dvdPlayer = dvdPlayer;
+        _projector = projector;
+        _soundSystem = soundSystem;
+        _lights = lights;
+    }
+
+    public void WatchMovie(string movie)
+    {
+        Console.WriteLine("Get ready to watch a movie...");
+        _lights.Dim(10);
+        _projector.On();
+        _soundSystem.On();
+        _soundSystem.SetVolume(5);
+        _dvdPlayer.On();
+        _dvdPlayer.Play(movie);
+    }
+
+    public void EndMovie()
+    {
+        Console.WriteLine("Shutting movie theater down...");
+        _dvdPlayer.Off();
+        _soundSystem.Off();
+        _projector.Off();
+        _lights.Dim(100);
+    }
+}
+
+\\Using the Facade
+class Program
+{
+    static void Main(string[] args)
+    {
+        var dvdPlayer = new DVDPlayer();
+        var projector = new Projector();
+        var soundSystem = new SoundSystem();
+        var lights = new Lights();
+
+        var homeTheater = new HomeTheaterFacade(dvdPlayer, projector, soundSystem, lights);
+
+        homeTheater.WatchMovie("Inception");
+        Console.WriteLine("Press any key to end the movie...");
+        Console.ReadKey();
+        homeTheater.EndMovie();
+    }
+}
+
+
+```
+
+### Aggregate
+- If we want to do a transaction where we first fetch the data and then update the data
+- Use an aggregate class for this.
+- Aggregate root means we modify through single route
+- Aggregate root is a class itself. Many times a normal properly designed domain objects can also act as aggregate root.
+- Aggregate root modifies the object through the root
+- Command is different from the model
+- We need Automapper to convert the command to the model and pass it to the repository
+- Create Customer command first goes to the handler. 
+- The handler goes to the aggregate root, gets the objects and saves it using the repository
+
+### Event Sourcing
+- Lets say that Create Customer command is executed, then an update customer, edit customer and delete customer
+- Each of these commands correspond to events like creating a customer, updating a customer, editing a customer and deleting a customer
+- Event Sourcing is a collection of events as they happen.
+- Event Sourcing is a powerful pattern that captures all changes to an application's state as a sequence of events. This approach provides benefits like auditability, temporal queries, and improved scalability
+- Critical concept used in Microservices
+- Event sourcing has collection of events of what happened when the command fired.
+- Aggregate root is the collection of objects needed during that command and the contained objects should be modified through a single root.
+- Event Sourcing, Aggregate root are compulsory for microservices 
+- Projection is the process of converting a model to another structure usually using Automapper.
+- Event Source can be RabbitMq or Azure Service Bus.
+
+### CQRS Pattern the nitty gritties
+- We fire a command usually through a POST request
+- Lets say CreateCustomer() post request fires the Create Customer Command
+- Each command has a handler associated with it
+- Each handler interacts with several other entities: For e.g it might connect to Aggregate to get the customer details
+- It also talks to the repository to save the data in the database
+- We would ideally want a solution where rather than calling the handler directly we associate a handler with the command itself. Enter:MediatR
+- There can be a case where the handler calls another microservice and passes along some data to it
+- What if there is a failure, then how do we reverse it?
+- Our applications must be resilient, must be able to handle failures
+- We must ensure eventual consistency. We first must create a customer, then send an event to a queue to update this particular customer details everywhere it used and read.
+- Must follow optimistic concurrency.
+- All inserts must happen in the local database. When this insert is done, send it to the queue. If there is any problem, there should be a retry mechanism in place.
+- Command Handler is different from Facade Pattern
+
+# Creational Pattern: Factory Pattern, Abstract Factory Pattern
+- Factory method design pattern defines an interface for creating an object, but lets subclasses decide which class to instantiate.
+- This pattern lets a class defer instantiation to its subclasses
+***Many developers think centralizing the object creation is Factory Pattern: Wrong!!!***
+- This pattern is particularly useful when the exact type of object to be created isn’t known until runtime.
+- Let’s consider a scenario where we need to create different types of credit cards. We will use the Factory Pattern to create instances of different credit card types based on user input.
+- If we have multiple combination of objects that need to be created use the Factory Pattern
+- Look at the case of Special Customer where we need to do Tax Calculation and Delivery as well(example in FactoryPattern.cs)
+- Dont use if-else or switch statement in Factory Pattern
+- Use Dictionary for example
+
+```c#
+static Dictionary<int,ICustomer> custs = new Dictionary<int,ICustomer>();
+public static SimpleFactory
+{
+    custs.Add(1, new DiscountedCustomer());
+    custs.Add(2, new GoldCustomer());
+}
+
+public static ICustomer Create(int i)
+{
+    //Clone it to avoid getting a singleton instance everytime it is called
+    return custs[i].Clone();
+}
+
+```
+- Example of Factory Pattern
+```c#
+\\Define an interface for the products the factory will create
+public interface ICreditCard
+{
+    string GetCardType();
+    int GetCreditLimit();
+    int GetAnnualCharge();
+}
+
+\\Implement the concrete products
+public class MoneyBackCreditCard : ICreditCard
+{
+    public string GetCardType() => "MoneyBack";
+    public int GetCreditLimit() => 15000;
+    public int GetAnnualCharge() => 500;
+}
+
+public class TitaniumCreditCard : ICreditCard
+{
+    public string GetCardType() => "Titanium";
+    public int GetCreditLimit() => 25000;
+    public int GetAnnualCharge() => 1500;
+}
+
+public class PlatinumCreditCard : ICreditCard
+{
+    public string GetCardType() => "Platinum";
+    public int GetCreditLimit() => 35000;
+    public int GetAnnualCharge() => 2000;
+}
+
+\\Create the Factory Class
+public class CreditCardFactory
+{
+    public static ICreditCard GetCreditCard(string cardType)
+    {
+        switch (cardType.ToLower())
+        {
+            case "moneyback":
+                return new MoneyBackCreditCard();
+            case "titanium":
+                return new TitaniumCreditCard();
+            case "platinum":
+                return new PlatinumCreditCard();
+            default:
+                throw new ArgumentException("Invalid card type");
+        }
+    }
+}
+
+\\Use the Factory in client code
+class Program
+{
+    static void Main(string[] args)
+    {
+        ICreditCard card = CreditCardFactory.GetCreditCard("Platinum");
+
+        Console.WriteLine($"Card Type: {card.GetCardType()}");
+        Console.WriteLine($"Credit Limit: {card.GetCreditLimit()}");
+        Console.WriteLine($"Annual Charge: {card.GetAnnualCharge()}");
+    }
+}
+
+
+```
+
+## Design Patterns Summary
+
+### Creational Patterns
+
+
+- Abstract Factory:	Creates an instance of several families of classes
+- Builder:	Separates object construction from its representation
+- Factory Method:	Creates an instance of several derived classes
+- Prototype:	A fully initialized instance to be copied or cloned
+- Singleton:	A class of which only a single instance can exist
+
+### Structural Patterns
+
+
+- Adapter:	Match interfaces of different classes
+- Bridge:	Separates an object’s interface from its implementation
+- Composite:	A tree structure of simple and composite objects
+- Decorator:	Add responsibilities to objects dynamically
+- Facade:	A single class that represents an entire subsystem
+- Flyweight:	A fine-grained instance used for efficient sharing
+- Proxy: 	An object representing another object
+
+### Behavioral Patterns
+
+
+- Chain of Resp.:	A way of passing a request between a chain of objects
+- Command:	Encapsulate a command request as an object
+- Interpreter:	A way to include language elements in a program
+- Iterator:	Sequentially access the elements of a collection
+- Mediator:	Defines simplified communication between classes
+- Memento:	Capture and restore an object's internal state
+- Observer:	A way of notifying change to a number of classes
+- State:	Alter an object's behavior when its state changes
+- Strategy:	Encapsulates an algorithm inside a class
+- Template Method:	Defer the exact steps of an algorithm to a subclass
+- Visitor:	Defines a new operation to a class without change
+

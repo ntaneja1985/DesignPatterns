@@ -20,6 +20,7 @@ namespace DesignPatterns
         public decimal Rating { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public abstract List<IAddress> Addresses { get; set; }
         public List<IAddress> AddressList { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int NumberOfVisit { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         string ICustomer.Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         string ICustomer.Age { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         decimal ICustomer.Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -64,8 +65,7 @@ namespace DesignPatterns
 
         public List<IAddress> Addresses { get; set; }
         public List<IAddress> AddressList { get; set; }
-
-   
+        public int NumberOfVisit { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 
     public class HomeAddressImpl : HomeAddress
@@ -76,6 +76,20 @@ namespace DesignPatterns
         public string PostalCode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Country { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Phone { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    }
+
+    public class AuditCustomer
+    {
+        public void Save(Customer customer)
+        {
+            
+        }
+    }
+
+    public class CustomerReporting //DTO
+    {
+        public string Name { get; set; }
+        public int NumberOfVisits { get; set; }
     }
 
     public class OfficeAddressImpl : OfficeAddress
@@ -123,6 +137,7 @@ namespace DesignPatterns
         public decimal Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public decimal Rating { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public List<IAddress> AddressList { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int NumberOfVisit { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public List<IAddress> Addresses()
         {
@@ -150,6 +165,7 @@ namespace DesignPatterns
     {
         public decimal Rating { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public List<IAddress> AddressList { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int NumberOfVisit { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         string ICustomer.Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         string ICustomer.Age { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         decimal ICustomer.Amount { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
