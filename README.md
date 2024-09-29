@@ -486,7 +486,7 @@ Remember, DIP isn't just about interfaces; it's about designing your system to d
 
 ***SOLID is all about decoupling. How one class can be decoupled from the other class***
 
-# Factory Pattern
+# Simple Factory Pattern
 
 - Part of GoF patterns
 - Creational design pattern that provides an interface for creating objects in a way that allows subclasses to decide which class to instantiate.
@@ -502,6 +502,7 @@ IDiscount discount = Someone.Create(1);
 
 - Think of it this way, imagine a factory that takes the same input of wood and creates table,chair,sofa,bed etc.
 - It's like having a customizable assembly line for creating objects
+- Centralizes Object Creation
 
 ```c#
 internal static class SimpleFactory
@@ -883,6 +884,8 @@ public void Add(IAddress addr)
 # Bridge Pattern
 
 - The Bridge Design Pattern is all about decoupling an abstraction from its implementation. 
+- Abstraction means interfaces and implementation is a class that implements the interface
+- Uses encapsulation and aggregation and can use inheritance to separate responsibilities into different classes
 - Imagine you have this fancy abstraction (let's call it "Abstractionville") that wants to do some cool stuff, but it doesn't want to be tied down to a specific implementation. It's like Abstractionville wants to date around without committing to anyone—very modern, I must say!
 
 - Bridge splits things into two parts:
@@ -1149,6 +1152,7 @@ public interface IExport
 
 # CQRS: Command Query Responsibility Segregation
 - Divide your classes into 2: Create/Update/Delete Classes and Query Classes
+- Helps to divide the normalized data from denormalized data
 - Establish bounded context, CreateCustomer() is different from GetCustomer()
 - When we design interfaces we run into situations that we need certain fields during the READ part and not necessarily during the INSERT/UPDATE part.
 - For example, we may want to lookup number of visits of customer(computed value) during the read part, but in write part we may not need it
@@ -1315,7 +1319,7 @@ waiterInvoker.ExecuteCommand(); // Waiter serves customer
 ## Facade Pattern is different from Adapter Pattern
 - Adapter pattern is used when we have incompatible interfaces (remember pdfexport, word export example)
 - Facade pattern is simply used to simplify the interaction with a complex subsystem
-
+- Simplifies a subsystem
 ```c#
 \\Components of the Home Theatre System
 public class DVDPlayer
@@ -1440,10 +1444,15 @@ class Program
 - All inserts must happen in the local database. When this insert is done, send it to the queue. If there is any problem, there should be a retry mechanism in place.
 - Command Handler is different from Facade Pattern
 
-# Creational Pattern: Factory Pattern, Abstract Factory Pattern
+# Simple Factory Pattern
+- Centralizes object creation (Container)
+
+# Creational Pattern: Factory Method Pattern
 - Factory method design pattern defines an interface for creating an object, but lets subclasses decide which class to instantiate.
 - This pattern lets a class defer instantiation to its subclasses
+- Inheritance for complex object creation, uses permutation and combination(remember Gold Customer, VAT Tax, Courier Delivery)
 ***Many developers think centralizing the object creation is Factory Pattern: Wrong!!!***
+***Simple Factory Pattern is not Factory Method Pattern***
 - This pattern is particularly useful when the exact type of object to be created isn’t known until runtime.
 - Let’s consider a scenario where we need to create different types of credit cards. We will use the Factory Pattern to create instances of different credit card types based on user input.
 - If we have multiple combination of objects that need to be created use the Factory Pattern
@@ -1532,6 +1541,297 @@ class Program
 
 
 ```
+
+- Define an interface for creating an object and defer the instantiation to the sub-classes
+
+```c#
+ //Define an interface for creating an object
+ public interface IFactoryCustomer
+    {
+        ICustomerType Create();
+        ITax CreateTax();
+        IDelivery CreateDelivery();
+    }
+
+
+    //Create an instantiation of the interface with a base class and mark its methods as virtual
+    //Think of it as the Base Class
+    public class FactoryCustomer : IFactoryCustomer
+    {
+        public virtual ICustomerType Create()
+        {
+            //there can be several permutations and combinations
+            return new BasicCustomer(CreateTax(),CreateDelivery());
+        }
+
+        public virtual IDelivery CreateDelivery()
+        {
+            //There will be several permutation and combinations, not so simplistic
+            return new CourierDelivery();
+        }
+
+        public virtual ITax CreateTax()
+        {
+            //There will be several permutation and combinations, not so simplistic
+            return new GSTTax();
+        }
+    }
+
+    //Defer instantiation to the subclasses
+    public class FactoryCustomerPickup: FactoryCustomer
+    {
+        public override IDelivery CreateDelivery()
+        {
+            return new PickupDelivery();  
+        }
+    }
+
+    //This will have VAT Tax and Pickup Delivery
+    //Defer instantiation to the subclasses
+    public class FactoryCustomerVATPickup:FactoryCustomerPickup
+    {
+        public override ITax CreateTax()
+        {
+            return new VATTax();   
+        }
+    }
+
+    //This will have a Gold Customer, VAT Tax and Pickup Delivery
+    //Defer instantiation to the subclasses
+    //Take 2-3 combinations from the top and change 1 step
+    public class FactoryGoldCustomerVATPickup : FactoryCustomerPickup
+    {
+        public override ICustomerType Create()
+        {
+            return new GoldCustomer(CreateTax(),CreateDelivery());
+        }
+    }
+```
+
+
+# Abstract Factory Pattern
+- Abstract factory sits on top of the Factory Pattern
+- It is referred to factory of factories because it helps create other factories
+- It has the following components
+1. Abstract Factory: Defines an interface for creating Abstract Product Objects
+2. Concrete Factory: Implements the operations in Abstract Factory to create Concrete Product Objects
+3. Abstract Product: Defines an interface for type of Product Object
+4. Concrete Product: Defines the concrete implementation for the abstract product
+
+- There are no subclasses
+- It provides an interface for creating families of related objects
+- Sits on top of factories
+- You can go across factories(use from FactorySupplier and FactoryCustomer)
+- Simple Factory is for one class and one family(centralized object creation, it is just a lookup). It is a container from where we can get instances.
+- Factory Pattern is permutations and combinations of ITax, IDelivery and ICustomerType(use inheritance and subclasses)
+- Abstract Factory is for going across different factories
+
+
+
+```c#
+
+\\Abstract Product
+public interface ICar 
+{
+    void Drive();
+}
+public interface IBike
+{
+    void Ride();
+}
+
+\\Concrete Product
+public class HondaCar: ICar
+{
+    void Drive()
+    {
+        Console.WriteLine("Driving a Honda Car");
+    }
+}
+public class YamahaCar: ICar
+{
+    void Drive()
+    {
+        Console.WriteLine("Driving a Yamaha Car");
+    }
+}
+public class YamahaBike: IBike
+{
+    void Ride()
+    {
+        Console.WriteLine("Riding a Yamaha Bike");
+    }
+}
+public class HondaBike: IBike
+{
+    void Ride()
+    {
+        Console.WriteLine("Riding a Honda Bike");
+    }
+}
+
+\\Abstract Factory
+public interface IVehicleFactory
+{
+    ICar CreateCar();
+    IBike CreateBike();
+}
+
+\\Concrete Factory
+public class HondaFactory:IVehicleFactory
+{
+   public  ICar CreateCar()
+    {
+        return new HondaCar();
+    }
+   public  IBike CreateBike()
+    {
+        return new HondaBike();
+    }
+}
+
+public class YamahaFactory:IVehicleFactory
+{
+   public  ICar CreateCar()
+    {
+        return new YamahaCar();
+    }
+   public  IBike CreateBike()
+    {
+        return new YamahaBike();
+    }
+}
+
+\\Usage
+
+IVehicleFactory factory = new HondaFactory();
+ICar hondaCar = factory.CreateCar();
+IBike hondaBike = factory.CreateBike();
+
+hondaCar.Drive();
+hondaBike.Ride();
+
+IVehicleFactory factory = new YamahaFactory();
+ICar yamahaCar = factory.CreateCar();
+IBike yamahaBike = factory.CreateBike();
+
+yamahaCar.Drive();
+yamahaBike.Ride();
+
+
+```
+
+# Template Pattern
+- Behavioral Design Pattern that defines the skeleton of an algorithm in a method, deferring some steps to subclasses
+- It allows subclasses to redefine certain steps of the algorithm without changing the algorithm's structure
+- Here subclasses can provide specific implementations for certain steps
+- Think of connecting to database: open connection, read connection and close connection
+- Similarly for reading from a file: open a file, read the file stream, close the file stream
+- In the above process, steps are the same, we can have abstract methods like Open(), Read(), Close()
+- Implementation can be inside a FileProcessor or DataProcessor
+- It has 2 components
+1. Abstract Class: Defines abstract methods that subclasses should implement and a template method that defines the algorithm's structure
+2. Concrete Class: Implements the abstract methods defined in the Abstract Class
+- Scenarios for using template pattern include: XML Parsing, ETL Process, Connecting to Db, Page Lifecycle, Payment Process, Parsing of file, fixed workflows, reporting templates, Customizing Logging utility
+- Look up the 6 scenarios for template pattern by shivprasad koirala
+- Template Pattern has fixed steps, inherit and change particular step in the child class
+
+
+```c#
+
+\\Define the Abstract Class
+public abstract class DataProcessor
+{
+    \\Define the steps of the algorithm
+    public void ProcessData()
+    {
+        ReadData();
+        Process();
+        SaveData();
+    }
+    
+    \\Concrete implementations will be provided in subclasses
+    public abstract void ReadData();
+    public abstract void Process();
+    public abstract void SaveData();
+}
+
+\\Define the Concrete Classes
+
+public class CsvProcessor: DataProcessor
+{
+    protected override void ReadData()
+    {
+        Console.WriteLine("Reading data from CSV file.");
+    }
+
+    protected override void Process()
+    {
+        Console.WriteLine("Processing CSV data.");
+    }
+
+    protected override void SaveData()
+    {
+        Console.WriteLine("Saving processed data to CSV file.");
+    }
+}
+
+public class XmlDataProcessor : DataProcessor
+{
+    protected override void ReadData()
+    {
+        Console.WriteLine("Reading data from XML file.");
+    }
+
+    protected override void Process()
+    {
+        Console.WriteLine("Processing XML data.");
+    }
+
+    protected override void SaveData()
+    {
+        Console.WriteLine("Saving processed data to XML file.");
+    }
+}
+
+\\Usage
+class Program
+{
+    static void Main(string[] args)
+    {
+        DataProcessor csvProcessor = new CsvDataProcessor();
+        csvProcessor.ProcessData();
+
+        DataProcessor xmlProcessor = new XmlDataProcessor();
+        xmlProcessor.ProcessData();
+    }
+}
+
+
+```
+
+# Decorator Pattern (evolved from Bridge Pattern)
+- The Decorator Pattern is a structural design pattern that allows you to dynamically add behavior to an object without altering its structure.
+- This pattern is particularly useful when you want to add responsibilities to individual objects, not to an entire class.
+- Key Components
+    1. Component Interface: Defines the interface for objects that can have responsibilities added to them.
+    2. Concrete Component: The class that implements the Component interface and provides the basic behavior.
+    3. Decorator: An abstract class that implements the Component interface and contains a reference to a Component object. This class serves as the base for all decorators.
+    4. Concrete Decorators: Classes that extend the Decorator class and add additional behavior.
+
+***YAGNI: Your arent gonna need it(Martin Fowler)***
+- Always implement things when you need them, never when you just forsee them.
+- Do the simplest thing that could possibly work
+- Dont do over-architecting
+
+***Model vs Entity vs DTO***
+- DTO is the odd man out
+- Say we have client app running in React and we want to transfer data to WebAPIController
+- DTO is a POCO object which helps to transfer data from one logical unit to another
+- Goal of DTO is just to pass Data
+- Model is similar to Entity (Model was in OOPs and Entity comes from DDD(Domain Driven Development))
+- All models dont necessarily become an entity, some of them become a service class also
+- Entity is like the implementation
 
 ## Design Patterns Summary
 

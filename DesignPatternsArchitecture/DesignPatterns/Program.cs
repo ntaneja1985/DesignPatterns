@@ -75,11 +75,37 @@ var billing = new Billing();
 BillingFacade billingFacade = new BillingFacade(accounting,billing);
 billingFacade.StartBilling();
 
-CustomerType custType = new GoldCustomer();
+ICustomerType custType = new GoldCustomer(new GSTTax(),new CourierDelivery());
 //Wrong
-CustomerType custType2 = SimpleFactoryCustomerType.Create(0);
+ICustomerType custType2 = SimpleFactoryCustomerType.Create(0);
 //Right
-CustomerType custType3 = CustomerTypeFactory.GetCustomerType(1);
+ICustomerType custType3 = CustomerTypeFactory.GetCustomerType(1);
+
+//More simple, we define the interface and concrete factory implementation it has to use
+IFactoryCustomer factoryCustomer = new FactoryCustomer();
+ICustomerType cust4 = factoryCustomer.Create();
+
+//Use the customer with pickup instead of courier
+IFactoryCustomer factoryCustomerPickup = new FactoryCustomerPickup();
+ICustomerType cust5 = factoryCustomerPickup.Create();
+
+//use the customer with pickup instead of courier and VAT Tax instead of GST Tax
+IFactoryCustomer factoryCustomerPickupVAT = new FactoryCustomerVATPickup();
+ICustomerType cust6 = factoryCustomerPickupVAT.Create();
+
+//use a gold customer instead of Basic Customer with pickup instead of courier and VAT  Tax instead of GST Tax
+IFactoryCustomer factoryGoldCustomerPickupVAT = new FactoryGoldCustomerVATPickup();
+ICustomerType cust7 = factoryGoldCustomerPickupVAT.Create();
+
+
+CustomerDb customerDb = new CustomerDb();
+customerDb.Execute();
+
+//Decoupled the abstraction and implementation
+ICustomerAbstraction customerAbstraction = new PaidCustomerNew();
+IValidate validate = new PaidValidate();
+validate.Validate(customerAbstraction);
+
 
 
 

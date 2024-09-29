@@ -18,7 +18,7 @@ namespace DesignPatterns
 
     //}
 
-    public interface CustomerType
+    public interface ICustomerType
     {
         void Calculate();
     }
@@ -32,7 +32,7 @@ namespace DesignPatterns
         void Deliver();
     }
 
-    public class SpecialCustomer : CustomerType
+    public class SpecialCustomer : ICustomerType
     {
         private readonly ITax _tax;
         private readonly IDelivery _delivery;
@@ -56,6 +56,14 @@ namespace DesignPatterns
         }
     }
 
+    public class PickupDelivery : IDelivery
+    {
+        public void Deliver()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class GSTTax : ITax
     {
         public void CalculateTax()
@@ -63,19 +71,44 @@ namespace DesignPatterns
             throw new NotImplementedException();
         }
     }
-    public class GoldCustomer : CustomerType
+    public class VATTax : ITax
     {
-        public void Calculate()
+        public void CalculateTax()
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class GoldCustomer : BaseCustomerType
+    {
+        public GoldCustomer(ITax tax, IDelivery delivery) : base(tax, delivery)
+        {
+
+        }
+        public override void Calculate()
         {
             //Do something
         }
     }
-
-    public class DiscountedCustomer : CustomerType
+    public class BasicCustomer : BaseCustomerType
     {
-        public void Calculate()
+        public BasicCustomer(ITax tax, IDelivery delivery) : base(tax, delivery)
+        {
+
+        }
+        public override void Calculate()
         {
             //Do something
+        }
+    }
+    public class DiscountedCustomer : BaseCustomerType
+    {
+        public DiscountedCustomer(ITax tax,IDelivery delivery):base(tax,delivery)
+        {
+            
+        }
+        public override void Calculate()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -83,32 +116,115 @@ namespace DesignPatterns
     //Centralizing object creation is not factory pattern
     public static class SimpleFactoryCustomerType 
     {
-        public static CustomerType Create(int i)
+        public static ICustomerType Create(int i)
         {
             if(i == 0)
             {
-                return new DiscountedCustomer();
+                return new DiscountedCustomer(new GSTTax(),new CourierDelivery());
             }
-           return new GoldCustomer();
+           return new GoldCustomer(new GSTTax(), new CourierDelivery());
         }
 
     }
 
+    public abstract class BaseCustomerType: ICustomerType
+    {
+        ITax _tax;
+        IDelivery _delivery;
+        protected BaseCustomerType(ITax tax, IDelivery delivery)
+        {
+            
+        }
+        public abstract void Calculate();
+    }
+
     public class CustomerTypeFactory
     {
-        public static CustomerType GetCustomerType(int i)
+        public static ICustomerType GetCustomerType(int i)
         {
             switch (i)
             {
                 case 0:
-                    return new DiscountedCustomer();
+                    return new DiscountedCustomer(new GSTTax(), new CourierDelivery());
                 case 1:
-                    return new GoldCustomer();
+                    return new GoldCustomer(new GSTTax(), new CourierDelivery());
                 case 2: return new SpecialCustomer(new GSTTax(), new CourierDelivery());
                 default:
                     throw new ArgumentException("Invalid customer type");
             }
         }
     }
+
+    //Define an interface for creating an object
+    public interface IFactoryCustomer
+    {
+        ICustomerType Create();
+        ITax CreateTax();
+        IDelivery CreateDelivery();
+    }
+
+
+    //Defer instantiation to the subclasses
+    public class FactoryCustomer : IFactoryCustomer
+    {
+        public virtual ICustomerType Create()
+        {
+            //there can be several permutations and combinations
+            return new BasicCustomer(CreateTax(),CreateDelivery());
+        }
+
+        public virtual IDelivery CreateDelivery()
+        {
+            //There will be several permutation and combinations, not so simplistic
+            return new CourierDelivery();
+        }
+
+        public virtual ITax CreateTax()
+        {
+            //There will be several permutation and combinations, not so simplistic
+            return new GSTTax();
+        }
+    }
+
+    //Defer instantiation to the subclasses
+    public class FactoryCustomerPickup: FactoryCustomer
+    {
+        public override IDelivery CreateDelivery()
+        {
+            return new PickupDelivery();  
+        }
+    }
+
+    //This will have VAT Tax and Pickup Delivery
+    //Defer instantiation to the subclasses
+    public class FactoryCustomerVATPickup:FactoryCustomerPickup
+    {
+        public override ITax CreateTax()
+        {
+            return new VATTax();   
+        }
+    }
+
+    //This will have a Gold Customer, VAT Tax and Pickup Delivery
+    //Defer instantiation to the subclasses
+    //Take 2-3 combinations from the top and change 1 step
+    public class FactoryGoldCustomerVATPickup : FactoryCustomerPickup
+    {
+        public override ICustomerType Create()
+        {
+            return new GoldCustomer(CreateTax(),CreateDelivery());
+        }
+    }
+
+    //Abstract Factory Pattern
+    
+    public class FactorySupplier
+    {
+        public ITax Create()
+        {
+            return new GSTTax();
+        }
+    }
+
 
 }
