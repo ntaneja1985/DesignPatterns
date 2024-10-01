@@ -1813,12 +1813,197 @@ class Program
 # Decorator Pattern (evolved from Bridge Pattern)
 - The Decorator Pattern is a structural design pattern that allows you to dynamically add behavior to an object without altering its structure.
 - This pattern is particularly useful when you want to add responsibilities to individual objects, not to an entire class.
+- It is a linked list type of pattern, remember the nested validation example given below
+- Very useful for production code. Follows open-closed principle. We dont modify the production code but add more functionality on top of it.
+- Follow 2 main rules
+1. Dont change base class
+2. Client should refer the generic interface(IValidate)
+
+- Plug and play kind of structure
 - Key Components
     1. Component Interface: Defines the interface for objects that can have responsibilities added to them.
     2. Concrete Component: The class that implements the Component interface and provides the basic behavior.
     3. Decorator: An abstract class that implements the Component interface and contains a reference to a Component object. This class serves as the base for all decorators.
     4. Concrete Decorators: Classes that extend the Decorator class and add additional behavior.
 
+```c#
+//Define the component interface
+public interface INotifier
+{
+    void Send(string message);
+}
+
+//Define the Concrete Component
+
+public class EmailNotifier:INotifier
+{
+    public void Send(string message)
+    {
+         Console.WriteLine($"Sending Email: {message}");
+    }
+}
+
+//Create Abstract Decorator
+public abstract class NotifierDecorator : INotifier
+{
+    protected INotifier _notifier;
+
+    public NotifierDecorator(INotifier notifier)
+    {
+        _notifier = notifier;
+    }
+
+    public virtual void Send(string message)
+    {
+        _notifier.Send(message);
+    }
+}
+
+
+//Create Concrete Decorators
+public class SMSNotifier : NotifierDecorator
+{
+    public SMSNotifier(INotifier notifier) : base(notifier) { }
+
+    public override void Send(string message)
+    {
+        //Fire the base send message first
+        base.Send(message);
+        //Then send our own message
+        Console.WriteLine($"Sending SMS: {message}");
+    }
+}
+
+public class FacebookNotifier : NotifierDecorator
+{
+    public FacebookNotifier(INotifier notifier) : base(notifier) { }
+
+    public override void Send(string message)
+    {
+        //Fire the base send message first
+        base.Send(message);
+        //Then send our own message
+        Console.WriteLine($"Sending Facebook message: {message}");
+    }
+}
+
+//Use the Decorator
+class Program
+{
+    static void Main(string[] args)
+    {
+        INotifier notifier = new EmailNotifier();
+        notifier = new SMSNotifier(notifier);
+        notifier = new FacebookNotifier(notifier);
+
+        notifier.Send("Hello, World!");
+    }
+}
+
+```
+
+- Another example of Decorator Pattern is nested validations
+```c#
+ //Decorator Pattern
+    public class ValidationLinker : IValidate
+    {
+        IValidate _nextValidateLink = null;
+        public ValidationLinker(IValidate validate)
+        {
+            _nextValidateLink=validate;
+        }
+        public virtual void Validate(ICustomerAbstraction obj)
+        {
+            _nextValidateLink.Validate(obj);
+        }
+    }
+
+    public class BasicValidation : IValidate
+    {
+        public void Validate(ICustomerAbstraction obj)
+        {
+            if (string.IsNullOrEmpty(obj.Name))
+            {
+                throw new Exception("Name is required");
+            }
+        }
+    }
+
+    public class PhoneCheckValidation : ValidationLinker
+    {
+        public PhoneCheckValidation(IValidate obj) : base(obj)
+        {
+
+        }
+
+        public override void Validate(ICustomerAbstraction obj)
+        {
+            //First call the base validation
+            base.Validate(obj);
+
+            //Then run our own validation
+            if (string.IsNullOrEmpty(obj.Phone))
+            {
+                throw new Exception("Phone number is required");
+            }
+        }
+    }
+
+    public class BillCheckValidation : ValidationLinker
+        {
+            public BillCheckValidation(IValidate obj):base (obj) 
+            {
+                
+            }
+            public override void Validate(ICustomerAbstraction obj)
+            {
+                //First call the base validation
+                base.Validate(obj);
+
+                //Then run our own validation
+                if (obj.BillAmount == 0)
+                {
+                    throw new Exception("Bill Amount cannot be zero");
+                }
+            }
+        }
+
+\\Usage
+
+IValidate validate1 = new BasicValidation();
+validate1 = new PhoneCheckValidation(validate1);
+validate1 = new BillCheckValidation(validate1);
+validate1.Validate(customerAbstraction);
+
+OR
+
+IValidate v = new BillCheckValidation(new PhoneCheckValidation(new BasicValidation()));
+```
+
+### The Decorator Pattern is widely used in scenarios where you need to add responsibilities to objects dynamically and transparently, without affecting other objects. Here are some common use cases:
+
+- Graphical User Interfaces (GUIs): To add functionalities like borders, scrollbars, or shadows to windows or text fields.
+- Streams in I/O: In Java and .NET, streams use decorators to add functionalities like buffering, filtering, and compression.
+- Logging: To add different logging behaviors (e.g., logging to a file, console, or remote server) without changing the core logging logic.
+- Data Encryption/Compression: To add encryption or compression to data streams.
+- Notifications: As shown in the example, to add multiple notification methods (email, SMS, push notifications) dynamically.
+- File Handling: To add functionalities like reading from or writing to different file formats.
+
+***Example in Java I/O Streams***
+- In Java, the java.io package uses the Decorator Pattern extensively. For instance, BufferedReader is a decorator for Reader that adds buffering capabilities.
+```c#
+Reader reader = new FileReader("file.txt");
+BufferedReader bufferedReader = new BufferedReader(reader);
+String line = bufferedReader.readLine();
+
+```
+***Example in .NET Streams***
+- In .NET, the System.IO namespace uses decorators for stream handling.
+```c#
+Stream fileStream = new FileStream("file.txt", FileMode.Open);
+Stream gzipStream = new GZipStream(fileStream, CompressionMode.Compress);
+
+```
 ***YAGNI: Your arent gonna need it(Martin Fowler)***
 - Always implement things when you need them, never when you just forsee them.
 - Do the simplest thing that could possibly work

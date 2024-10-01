@@ -1,5 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using DesignPatterns;
+using Ninject;
+using System.Reflection;
 using static DesignPatterns.IEvent;
 
 Console.WriteLine("Hello, World!");
@@ -106,7 +108,18 @@ ICustomerAbstraction customerAbstraction = new PaidCustomerNew();
 IValidate validate = new PaidValidate();
 validate.Validate(customerAbstraction);
 
+IValidate validate1 = new BasicValidation();
+validate1 = new PhoneCheckValidation(validate1);
+validate1 = new BillCheckValidation(validate1);
+validate1.Validate(customerAbstraction);
 
+IValidate v = new BillCheckValidation(new PhoneCheckValidation(new BasicValidation()));
+
+//Object of Ninject
+IKernel _kernel = new StandardKernel();
+_kernel.Load(Assembly.GetExecutingAssembly());  
+//Will Inject Oracle Dal
+MySupplier sup1 = _kernel.Get<MySupplier>(x=>x.Name=="O");
 
 
 
