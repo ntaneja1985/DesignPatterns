@@ -296,6 +296,67 @@ In this example:
 - The LSP ensures that substituting a Rectangle or a Circle for a Shape doesn't break the program. The behavior (calculating the area) remains consistent.
 - Remember, adhering to the LSP helps maintain a robust and predictable class hierarchy, making it easier to reason about your code and preventing unexpected surprises when swapping objects.
 
+- The Liskov Substitution Principle (LSP) is one of the SOLID principles of object-oriented design. It states that objects of a superclass should be replaceable with objects of its subclasses without affecting the correctness of the program.
+- In other words, a subclass should be able to stand in for its parent class without causing unexpected behavior.
+
+Key Concepts
+- Substitutability: Subclasses should be substitutable for their base classes.
+- Behavioral Consistency: Subclasses should not violate the expectations set by the base class.
+
+```c#
+public abstract class Bird
+{
+    public abstract void Fly();
+}
+
+public class Eagle : Bird
+{
+    public override void Fly()
+    {
+        Console.WriteLine("Eagle is flying high.");
+    }
+}
+
+//Violates LSP as Penguin doesnot implement Fly() method
+public class Penguin : Bird
+{
+    public override void Fly()
+    {
+        throw new NotImplementedException("Penguins can't fly.");
+    }
+}
+
+//Refactor it like this
+public abstract class Bird
+{
+    public abstract void Move();
+}
+
+public class Eagle : Bird
+{
+    public override void Move()
+    {
+        Console.WriteLine("Eagle is flying high.");
+    }
+}
+
+public class Penguin : Bird
+{
+    public override void Move()
+    {
+        Console.WriteLine("Penguin is swimming.");
+    }
+}
+
+
+```
+By using a more general method (Move), we ensure that all subclasses can be substituted for the base class without causing errors or unexpected behavior.
+
+Practical Use Cases
+- Collections: Ensuring that a collection of base class objects can be replaced with a collection of subclass objects without issues.
+- Frameworks and Libraries: Designing APIs where subclasses can be used interchangeably with base classes.
+- Testing: Creating mock objects that can stand in for real objects in unit tests.
+
 ## I --> Interface Segregation Principle
 - Follows from OCP Principle. 
 - Donot force the consumer to use an interface or methods which it doesnot need
@@ -479,7 +540,7 @@ Remember, DIP isn't just about interfaces; it's about designing your system to d
 
 - In Factory pattern, consumer doesnot create concrete implementation. It depends on IFactory
 
-- Interfaces is very uesful if we have complex classification of families.
+- Interfaces is very useful if we have complex classification of families.
 - SOA is an architectural style, Event Sourcing is a microservices design pattern
 - If there is no common logic between classes, then abstract class is not really required. However utilizing interfaces is a good practice.
 - Dont create abstract classes first. Usually they are made while refactoring.Also called Late architecting
@@ -741,7 +802,10 @@ interface ICustomer
 
 public class Customer : ICustomer
 {
-    private List<IAddress> Addresses {get;set;}
+    //wrong using List<T> allows us to modify addresses
+    //private List<IAddress> Addresses {get;set;}
+    //solution is to use IEnumerable
+    private IEnumerable<IAddress> Addresses {get;set;}
 
     public string Name {get;set;}
 
@@ -793,7 +857,19 @@ public class Customer : ICustomer
 
 - Whenever we' re dealing with collections and need to iterate through their elements sequentially, consider the Iterator Design Pattern.
 - It's especially handy when you want to keep your client code decoupled from the specifics of the collection implementation
+- Iterator is used to traverse a container and access the container's elements. The iterator pattern decouples algorithms from containers.
+- The Iterator Pattern is a behavioral design pattern that provides a way to access the elements of a collection object sequentially without exposing its underlying representation
+- useful when you need to traverse different types of collections in a uniform way
+- The elements of an aggregate object should be accessed and traversed without exposing its representation(data structure)
+- For each loop is not iterator pattern
+- Iterator just allows us to enumerate the internal elements of an object without exposing their types
+- Iterator pattern is going through elements of aggregate root object without exposing its data structure.
 
+Key Concepts
+- Iterator: An interface or abstract class that defines methods for accessing and traversing elements.
+- ConcreteIterator: A class that implements the Iterator interface and keeps track of the current position in the traversal.
+- Aggregate: An interface or abstract class that defines a method for creating an Iterator object.
+- ConcreteAggregate: A class that implements the Aggregate interface to return an instance of the ConcreteIterator.
 ```c#
 
 var employees = new List<Employee>
@@ -809,6 +885,90 @@ foreach (var employee in employees)
     Console.WriteLine($"Employee: {employee.Name}");
 }
 
+// Define the iterator interface
+public interface IIterator
+{
+    bool HasNext();
+    object Next();
+}
+
+//Create the Aggregate Interface
+public interface IAggregate
+{
+    IIterator CreateIterator();
+}
+
+//Create the concrete iterator
+public class BookIterator : IIterator
+{
+    private BookCollection _bookCollection;
+    private int _current = 0;
+
+    public BookIterator(BookCollection bookCollection)
+    {
+        _bookCollection = bookCollection;
+    }
+
+    public bool HasNext()
+    {
+        return _current < _bookCollection.Count;
+    }
+
+    public object Next()
+    {
+        return _bookCollection[_current++];
+    }
+}
+
+
+//Create the concrete aggregator
+public class BookCollection : IAggregate
+{
+    private List<string> _books = new List<string>();
+
+    public void AddBook(string book)
+    {
+        _books.Add(book);
+    }
+
+    public IIterator CreateIterator()
+    {
+        return new BookIterator(this);
+    }
+
+    public int Count
+    {
+        get { return _books.Count; }
+    }
+
+    public string this[int index]
+    {
+        get { return _books[index]; }
+    }
+}
+
+
+//Use the iterator
+class Program
+{
+    static void Main(string[] args)
+    {
+        BookCollection books = new BookCollection();
+        books.AddBook("Design Patterns");
+        books.AddBook("Refactoring");
+        books.AddBook("Clean Code");
+
+        IIterator iterator = books.CreateIterator();
+
+        while (iterator.HasNext())
+        {
+            string book = (string)iterator.Next();
+            Console.WriteLine(book);
+        }
+    }
+}
+
+
 
 ```
 
@@ -818,6 +978,7 @@ foreach (var employee in employees)
 - The main idea is to separate the iteration logic from the collection object itself.
 - IEnumerable<T> helps us to iterate through a collection. Internally it uses IEnumerator.
 - IEnumerable<T> doesnot have an add method, it only helps us to iterate over an object, helps us to maintain the sanctity of the object
+- In .NET, the System.Collections.IEnumerator interface serves a similar purpose. It provides a way to iterate over collections like List<T>, Dictionary<TKey, TValue>, and Queue<T>.
 
 
 ## If we have an aggregate root, we will always have iterator pattern attached to it. Clone for maintaining integrity.
@@ -936,6 +1097,7 @@ smsSender.SendMessage("Hey there, Copilot!");
 -When to Use It: Whenever you find yourself juggling different implementations for the same abstraction—like choosing between pizza toppings without committing to just one. 
 
 ### Abstraction is also like our interface: ICustomer
+- Not the job of ICustomer to do Validation, we should have a different interface to do Validation
 - For example, we need to validate our customer differently in different scenarios
 - Solution is to create a new interface IValidateCustomer and with a Validate() method
 - Now create classes that implement IValidateCustomer and implement the Validate method
@@ -958,6 +1120,12 @@ Basic example of Aggregation,Composition and Association
 - In DDD, we have Entity Classes, Service Classes and Value Objects
 - Primary purpose is to abstract and encapsulate the data access layer
 - Provides clean separation between business logic and the underlying data storage
+- Repository Pattern is based on Bridge Pattern
+- We deliberately use IEnumerable<T> in Repository Pattern so that the end client can at the max iterate through the collection, it cannot add to the collection
+- It would need to go through a separate Add() method to add to the collection
+- Any kind of Search function should use IEnumerable<T> to return collections
+- Good thing about IEnumerable, IEnumerator, IQueryable dont have updation method like Add, Update or Delete
+
 
 Before we explore the pattern, let's understand the problem it aims to solve. Imagine you're building a modern data driven application that needs to access data from a database (like SQL Server). The straightforward approach would be to write all the data access-related code directly within your application's controllers or services. For instance, if you're using Entity Framework, your controller might directly interact with the data context class and execute queries against the database.
 
@@ -1120,6 +1288,7 @@ public interface IExport
         //Internally it calls save
         public void Export()
         {
+        //Create instance of PdfExport
             PdfExport c = new PdfExport();
             c.Save();
         }
@@ -1130,6 +1299,7 @@ public interface IExport
     {
         public void Export()
         {
+            //Use inheritance to call Save() of PdfExport
             this.Save();
         }
     }
@@ -1161,6 +1331,8 @@ public interface IExport
 - Sticking to reusability too much can lead to complicated classes which violate SRP principle
 - Solution is CQRS, separate out the classes meanT for reporting(QUERY) and those required for INSERT/UPDATE/DELETE
 - CQRS is a design pattern
+- CQRS builds on top of Repository Pattern
+- Final call of CQRS goes to Repository Pattern
 - CQRS is a good pattern for doing transactions between systems-->makes it valuable for designing microservices
 - Please note Model and Command class is not the same
 - Command is an action like insert/update/delete
@@ -1200,7 +1372,13 @@ public interface ICommand
 
 ## Command Design Pattern
 - Actions can also be classes
-
+- 4 terms associated with command pattern are command, receiver, invoker and the client. A command object(PrepareDishCommand) knows about the Receiver(Chef) and invokes a method of the receiver(PrepareDish()).
+- The receiver(Chef) then does the job via the Execute() method of the Command(Prepare Dish). 
+- The invoker object knows how to execute the command. It only knows about the command interface.  Invoker object, command object and receiver objects are held by Client object(Program.cs)
+- The client decides which receiver object it assigns to the command objects and which commands it assigns to the invoker(WaiterInvoker)
+- Again the client decides which command to execute at what points.
+- To execute a command it just passes the command object to invoker object.
+- We use a Guid Id in Command object to distinguish between commands
 ```c#
 // Command interface
 public interface ICommand
@@ -1298,6 +1476,7 @@ waiterInvoker.ExecuteCommand(); // Waiter serves customer
 - Its primary goal is to reduce the complexity of communication between multiple objects by introducing a mediator: a central hub that handles interactions among these objects.
 - Think of a Facebook group. Members don't directly message each other: they post in the group, and the group handles distribution. Similarly, in software, the mediator coordinates interactions.
 - Mediator Class acts like a traffic police
+- Promotes loose coupling..makes the system easy to maintain and extend
 - Lets say we have an accounting application, an inventory application and billing application. If we call class billing it needs to make an entry into accounting or inventory needs to talk to accounting and billing
 - This interaction becomes complex very quickly
 - So we introduce a mediator in-between them
@@ -1305,6 +1484,85 @@ waiterInvoker.ExecuteCommand(); // Waiter serves customer
 - Mediator will invoke handlers of those classes which are called
 - CQRS is a combination of command pattern and mediator pattern
 
+Key Concepts
+- Mediator: Defines an interface for communication between Colleague objects.
+- ConcreteMediator: Implements the Mediator interface and coordinates communication between Colleague objects.
+- Colleague: Defines an interface for objects that communicate through the Mediator.
+- ConcreteColleague: Implements the Colleague interface and interacts with other Colleagues through the Mediator.
+
+```c#
+
+//Define the mediator interface
+public interface IChatRoomMediator
+{
+    void SendMessage(string message, User user);
+    void AddUser(User user);
+}
+
+//Create the concrete mediator
+public class ChatRoom : IChatRoomMediator
+{
+    private List<User> _users = new List<User>();
+
+    public void AddUser(User user)
+    {
+        _users.Add(user);
+    }
+
+    public void SendMessage(string message, User user)
+    {
+        foreach (var u in _users)
+        {
+            // Message should not be received by the user sending it
+            if (u != user)
+            {
+                u.Receive(message);
+            }
+        }
+    }
+}
+
+
+//Define the colleague class
+public abstract class User
+{
+    protected IChatRoomMediator _mediator;
+    protected string _name;
+
+    public User(IChatRoomMediator mediator, string name)
+    {
+        _mediator = mediator;
+        _name = name;
+    }
+
+    public abstract void Send(string message);
+    public abstract void Receive(string message);
+}
+
+//Define the concrete colleague class
+public class ConcreteUser : User
+{
+    public ConcreteUser(IChatRoomMediator mediator, string name) : base(mediator, name) { }
+
+    public override void Send(string message)
+    {
+        //Sending message
+        Console.WriteLine($"{_name} sends: {message}");
+        //Call the mediator to send the message: the mediator inturn runs the receive message for each of the users except that user which sent the message
+        _mediator.SendMessage(message, this);
+    }
+
+    public override void Receive(string message)
+    {
+        Console.WriteLine($"{_name} receives: {message}");
+    }
+}
+
+
+
+
+
+```
 ## Facade Pattern
 - Structural design pattern
 - What if we have a complex system with several subsystems
@@ -1416,6 +1674,7 @@ class Program
 - We need Automapper to convert the command to the model and pass it to the repository
 - Create Customer command first goes to the handler. 
 - The handler goes to the aggregate root, gets the objects and saves it using the repository
+- In some ways aggregate root is a violation of SRP.
 
 ### Event Sourcing
 - Lets say that Create Customer command is executed, then an update customer, edit customer and delete customer
