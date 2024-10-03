@@ -2263,6 +2263,563 @@ Stream fileStream = new FileStream("file.txt", FileMode.Open);
 Stream gzipStream = new GZipStream(fileStream, CompressionMode.Compress);
 
 ```
+
+
+# Antipatterns
+- Forced Pattern
+- If some design pattern is used ineffectively
+- It doesnot fulfil the objective for which it was created
+
+# Singleton Pattern
+- Restricts the instantiation of a class to one "single" instance.
+- Useful when only one object is needed to coordinate actions across the system
+- Uses Private Consumer
+- Lazy Loading
+- Thread Safety
+- Singleton Pattern = Static + Thread Safe + Lazy Loading + Instance Management
+- Should have lazy initialization
+- Singleton pattern is a wrapper over static
+- Used for caching(country master data want to cache it)
+- Singleton objects are protected/encapsulated, nobody cannot destroy them from outside
+- Singleton objects are lazy loaded
+- Safe IEnumerable Iterator
+- Thread Safety
+- Logic which can manipulate the data and control the instances
+- Ensures single source of truth
+- Helps in state management
+- Singleton pattern ensures that a class has only one instance and provides a global point of access to it.
+- Preventing to create an instance and inheriting (created sealed classes)
+
+```c#
+ public sealed class Singleton
+    {
+        private static readonly Lazy<Singleton> lazyInstance = new Lazy<Singleton>(() => new Singleton());
+
+        //Private constructor to prevent instantiation from outside
+        private Singleton() { }
+
+        //Public Property to provide Access from Outside
+        public static Singleton Instance { get { return lazyInstance.Value; } }
+
+        public void DoSomething()
+        {
+            Console.WriteLine("Singleton instance called");
+        }
+    }
+
+    //Usage
+    var singletonInstance = Singleton.Instance;
+    singletonInstance.DoSomething();
+
+```
+
+***In the above code, following points need to be considered***
+- Lazy<T> type ensures that instance is created only when it is first accessed. This is known as lazy initialization.
+- Lazy<T> is thread-safe by default, ensuring that only one instance is created even in a multi-threaded environment
+- Constructor is private to prevent direct instantiation from outside the class
+- Instance property provides a global access point to the singleton instance.
+
+## Main differences between a static class and a Singleton in C#:
+
+***Static Class***
+- Instantiation: A static class cannot be instantiated. All members of a static class are static and can be accessed directly using the class name.
+- Memory Allocation: Memory for a static class is allocated when the class is first loaded, and it remains allocated for the lifetime of the application.
+- Inheritance: Static classes cannot be inherited from or used as a base class.
+- Usage: Typically used for utility or helper methods that do not require maintaining state between method calls.
+
+***Singleton***
+- Instantiation: A Singleton class allows only one instance to be created. This instance is accessed through a static method or property.
+- Memory Allocation: Memory for the Singleton instance is allocated when it is first accessed, which can be lazy-loaded.
+- Inheritance: Singleton classes can be inherited from and can implement interfaces.
+- Usage: Used when exactly one instance of a class is needed to coordinate actions across the system
+
+### Key Differences
+- State Management: Singleton can maintain state between method calls, while a static class cannot.
+- Flexibility: Singleton provides more flexibility with inheritance and polymorphism, whereas static classes are more rigid.
+- Memory Management: Singleton instances are created on demand (lazy loading), while static classes are loaded into memory when the application starts.
+
+
+
+# Composite Pattern
+- Partitioning Design Pattern
+- Structural design pattern that allows you to compose objects into tree structures to represent part-whole hierarchies
+- This pattern is particularly useful for representing hierarchical structures such as file systems, organizational structures, or UI components
+- Part-Whole Hierarchy:(objects can be part of each other) way of organizing objects into a tree-like structure where each node represents a part of a larger whole. This concept is often used in various fields such as computer science, biology, and organizational structures to represent complex systems in a more manageable way.
+
+## Example in Real Life
+Consider a car as an example of a part-whole hierarchy:
+
+- Whole: The car itself.
+- Parts: The car is made up of various parts such as the engine, wheels, and body.
+- Sub-parts: Each of these parts can further be broken down. For example, the engine consists of pistons, cylinders, and spark plugs.
+
+- Key Concepts
+- Component: An abstract class or interface that declares the interface for objects in the composition.
+- Leaf: A class that represents leaf objects in the composition. A leaf has no children.
+- Composite: A class that represents a composite node (an object that has children). It implements child-related operations in the Component interface
+
+Key Concepts
+- Component: An interface that declares the common operations for both individual shapes and groups of shapes.
+- Leaf: A class that represents individual shapes (e.g., Circle, Square).
+- Composite: A class that represents a group of shapes.
+
+***Component Interface***
+```c#
+public interface IShape
+{
+    void Draw();
+}
+```
+***Leaf Classes***
+```c#
+public class Circle : IShape
+{
+    public void Draw()
+    {
+        Console.WriteLine("Drawing a Circle");
+    }
+}
+
+public class Square : IShape
+{
+    public void Draw()
+    {
+        Console.WriteLine("Drawing a Square");
+    }
+}
+```
+***Composite Class***
+```c#
+public class Group : IShape
+{
+    private List<IShape> shapes = new List<IShape>();
+
+    public void AddShape(IShape shape)
+    {
+        shapes.Add(shape);
+    }
+
+    public void RemoveShape(IShape shape)
+    {
+        shapes.Remove(shape);
+    }
+
+    public void Draw()
+    {
+        Console.WriteLine("Drawing a Group of Shapes:");
+        foreach (var shape in shapes)
+        {
+            shape.Draw();
+        }
+    }
+}
+
+```
+
+***Usage***
+```c#
+class Program
+{
+    static void Main()
+    {
+        // Creating individual shapes
+        IShape circle = new Circle();
+        IShape square = new Square();
+
+        // Creating a group of shapes
+        Group group = new Group();
+        group.AddShape(circle);
+        group.AddShape(square);
+
+        // Drawing individual shapes
+        circle.Draw();
+        square.Draw();
+
+        // Drawing the group of shapes
+        group.Draw();
+    }
+}
+
+```
+
+# Prototype Pattern
+- Creational Design Pattern
+- Allows us to create new objects by copying an existing object, known as the prototype. 
+- This pattern is useful when the creation of an object is costly or complex, and you want to avoid the overhead of creating a new instance from scratch.
+- Helps us to create clones of objects
+- For shallow cloning use this.MemberwiseClone() and for deep cloning use serialization or create clone() methods for each of the reference types
+- Can use ICloneable interface also
+## Key Concepts
+- Prototype Interface: Declares a method for cloning itself.
+- Concrete Prototype: Implements the cloning method to create a copy of itself.
+- Client: Creates a new object by asking a prototype to clone itself.
+
+***Legal Cloning and Illegal Cloning***
+- Legal clone is when the object provides a clone of itself(Memberwise Clone)
+- Illegal cloning is done from outside like using Serialization
+
+***Shallow Cloning and Deep Cloning***
+- In Shallow cloning, only the primitive types are cloned, the reference types are still the same and pointing to the same reference.
+- In Deep Cloning, not only the primitive types, but also the referenced types are cloned.
+```c#
+\\Prototype Interface
+public interface IPrototype<T>
+{
+    T Clone();
+}
+
+
+\\Concrete Prototype Class
+public class Shape : IPrototype<Shape>
+{
+    public string Type { get; set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
+
+    public Shape(string type, int width, int height)
+    {
+        Type = type;
+        Width = width;
+        Height = height;
+    }
+
+    public Shape Clone()
+    {
+        return (Shape)this.MemberwiseClone();
+    }
+
+    public void Display()
+    {
+        Console.WriteLine($"Shape: {Type}, Width: {Width}, Height: {Height}");
+    }
+}
+
+
+//Usage
+class Program
+{
+    static void Main()
+    {
+        // Create an original shape
+        Shape originalShape = new Shape("Rectangle", 50, 30);
+        originalShape.Display();
+
+        // Clone the original shape
+        Shape clonedShape = originalShape.Clone();
+        clonedShape.Display();
+
+        // Modify the cloned shape
+        clonedShape.Width = 100;
+        clonedShape.Display();
+
+        // Display the original shape to show it remains unchanged
+        originalShape.Display();
+    }
+}
+
+```
+
+## Explanation
+- Prototype Interface (IPrototype<T>): Defines the Clone method that all prototypes must implement.
+- Concrete Prototype Class (Shape): Implements the Clone method using MemberwiseClone to create a shallow copy of the object.
+- Usage: Demonstrates creating an original shape, cloning it, modifying the clone, and showing that the original remains unchanged.
+- This example shows how the Prototype pattern can be used to create new objects by cloning existing ones, which can be particularly useful when object creation is resource-intensive.
+
+
+# Memento Pattern
+- The Memento pattern is a behavioral design pattern that allows an object to save its state so it can be restored later. 
+- This is particularly useful for implementing undo functionality.
+- Have to be careful since it can lead to StackOverflowException
+- Helps us to maintain old state of the object and revert back to original state if required.
+
+## Key Concepts
+- Originator: The object whose state needs to be saved and restored.
+- Memento: The object that stores the state of the Originator.
+- Caretaker: The object that keeps track of the Memento but does not modify or inspect its contents.
+
+Example in C#
+Let’s consider a simple text editor where you can type text and undo changes.
+
+```c#
+\\Originator Class
+public class TextEditor
+{
+    private string text;
+
+    public void SetText(string newText)
+    {
+        text = newText;
+        Console.WriteLine($"Text set to: {text}");
+    }
+
+    public string GetText()
+    {
+        return text;
+    }
+
+    public TextMemento Save()
+    {
+        return new TextMemento(text);
+    }
+
+    public void Restore(TextMemento memento)
+    {
+        text = memento.GetText();
+        Console.WriteLine($"Text restored to: {text}");
+    }
+}
+
+
+\\Memento Class
+public class TextMemento
+{
+    private readonly string text;
+
+    public TextMemento(string textToSave)
+    {
+        text = textToSave;
+    }
+
+    public string GetText()
+    {
+        return text;
+    }
+}
+
+\\Caretaker Class
+public class TextEditorHistory
+{
+    private Stack<TextMemento> history = new Stack<TextMemento>();
+
+    public void Save(TextEditor editor)
+    {
+        history.Push(editor.Save());
+    }
+
+    public void Undo(TextEditor editor)
+    {
+        if (history.Count > 0)
+        {
+            editor.Restore(history.Pop());
+        }
+        else
+        {
+            Console.WriteLine("No states to restore.");
+        }
+    }
+}
+
+
+\\Usage
+class Program
+{
+    static void Main()
+    {
+        TextEditor editor = new TextEditor();
+        TextEditorHistory history = new TextEditorHistory();
+
+        editor.SetText("Version 1");
+        history.Save(editor);
+
+        editor.SetText("Version 2");
+        history.Save(editor);
+
+        editor.SetText("Version 3");
+
+        history.Undo(editor); // Restores to "Version 2"
+        history.Undo(editor); // Restores to "Version 1"
+    }
+}
+
+
+```
+
+## Explanation
+- Originator (TextEditor): Manages the text and can save and restore its state.
+- Memento (TextMemento): Stores the state of the TextEditor.
+- Caretaker (TextEditorHistory): Manages the history of states and can restore the TextEditor to a previous state.
+- This example demonstrates how the Memento pattern can be used to implement undo functionality in a text editor.
+
+
+# Flyweight Design Pattern
+- The Flyweight pattern is a structural design pattern that helps minimize memory usage by sharing as much data as possible with similar objects. 
+- It’s particularly useful when you need to create a large number of objects that share common properties
+- Information which is common in nature for various objects--> put them in a common object
+- Useful when we deal with large number of objects with simple repeated elements that would use large amount of memory if individually stored.
+- It is common to hold shared data in external data structures and pass it to the objects temporarily when they are used.
+
+## Key Concepts
+- Flyweight: The shared object that contains the common state (intrinsic state).
+- Context: The object that contains the unique state (extrinsic state).
+- Flyweight Factory: Manages the flyweight objects and ensures that they are shared properly.
+
+```c#
+\\Flyweight interface
+public interface IShape
+{
+    void Draw(string color);
+}
+
+\\Concrete Flyweight
+public class Circle : IShape
+{
+    private readonly int radius;
+
+    public Circle()
+    {
+        radius = 5; // Assume all circles have the same radius
+    }
+
+    public void Draw(string color)
+    {
+        Console.WriteLine($"Drawing a Circle with radius {radius} and color {color}");
+    }
+}
+
+\\Flyweight Factory
+public class ShapeFactory
+{
+    private static readonly Dictionary<string, IShape> shapes = new Dictionary<string, IShape>();
+
+    public static IShape GetShape(string color)
+    {
+        if (!shapes.ContainsKey(color))
+        {
+            shapes[color] = new Circle();
+            Console.WriteLine($"Creating a circle of color: {color}");
+        }
+        return shapes[color];
+    }
+}
+
+\\Usage
+class Program
+{
+    static void Main()
+    {
+        IShape shape1 = ShapeFactory.GetShape("Red");
+        shape1.Draw("Red");
+
+        IShape shape2 = ShapeFactory.GetShape("Green");
+        shape2.Draw("Green");
+
+        IShape shape3 = ShapeFactory.GetShape("Red");
+        shape3.Draw("Red");
+
+        IShape shape4 = ShapeFactory.GetShape("Blue");
+        shape4.Draw("Blue");
+
+        IShape shape5 = ShapeFactory.GetShape("Green");
+        shape5.Draw("Green");
+    }
+}
+
+
+```
+## Explanation
+- Flyweight Interface (IShape): Defines the Draw method that all shapes must implement.
+- Concrete Flyweight Class (Circle): Implements the Draw method and contains the intrinsic state (radius).
+- Flyweight Factory (ShapeFactory): Manages the creation and sharing of flyweight objects. It ensures that circles of the same color share the same instance.
+- Usage: Demonstrates creating and drawing circles with different colors. The factory ensures that circles of the same color are shared, reducing memory usage.
+- In this example, the Flyweight pattern helps reduce memory consumption by sharing circle objects with the same color. 
+
+
+
+# Strategy Pattern
+
+- Strategy pattern is a behavioral design pattern that allows you to define a family of algorithms, encapsulate each one, and make them interchangeable. 
+- This pattern lets the algorithm vary independently from the clients that use it, enabling the selection of an algorithm at runtime.
+- Catch in this pattern is that the objects that we create using this must belong to the same family since the context class holds reference to the same interface
+
+## Key Concepts
+- Strategy Interface: Defines a common interface for all supported algorithms.
+- Concrete Strategies: Implement the algorithm defined by the Strategy interface.
+- Context: Maintains a reference to a Strategy object and delegates the algorithm execution to the current Strategy.
+
+
+## Example in C#
+Let’s consider an example where we have a payment system that can process payments using different methods like credit card, PayPal, and Bitcoin.
+
+```c#
+\\Strategy Interface
+public interface IPaymentStrategy
+{
+    void Pay(decimal amount);
+}
+
+\\Concrete Strategy
+public class CreditCardPayment : IPaymentStrategy
+{
+    public void Pay(decimal amount)
+    {
+        Console.WriteLine($"Paid {amount} using Credit Card.");
+    }
+}
+
+public class PayPalPayment : IPaymentStrategy
+{
+    public void Pay(decimal amount)
+    {
+        Console.WriteLine($"Paid {amount} using PayPal.");
+    }
+}
+
+public class BitcoinPayment : IPaymentStrategy
+{
+    public void Pay(decimal amount)
+    {
+        Console.WriteLine($"Paid {amount} using Bitcoin.");
+    }
+}
+
+\\Context Class
+public class PaymentContext
+{
+    private IPaymentStrategy paymentStrategy;
+
+    public void SetPaymentStrategy(IPaymentStrategy strategy)
+    {
+        paymentStrategy = strategy;
+    }
+
+    public void Pay(decimal amount)
+    {
+        paymentStrategy.Pay(amount);
+    }
+}
+
+
+\\Usage
+class Program
+{
+    static void Main()
+    {
+        PaymentContext context = new PaymentContext();
+
+        // Pay using Credit Card
+        context.SetPaymentStrategy(new CreditCardPayment());
+        context.Pay(100);
+
+        // Pay using PayPal
+        context.SetPaymentStrategy(new PayPalPayment());
+        context.Pay(200);
+
+        // Pay using Bitcoin
+        context.SetPaymentStrategy(new BitcoinPayment());
+        context.Pay(300);
+    }
+}
+
+
+```
+## Explanation
+- Strategy Interface (IPaymentStrategy): Defines the Pay method that all payment strategies must implement.
+- Concrete Strategies (CreditCardPayment, PayPalPayment, BitcoinPayment): Implement the Pay method for different payment methods.
+- Context Class (PaymentContext): Maintains a reference to a IPaymentStrategy and delegates the Pay method to the current strategy.
+- Usage: Demonstrates how to switch between different payment strategies at runtime.
+- This example shows how the Strategy pattern can be used to select and execute different algorithms (payment methods) at runtime, providing flexibility and modularity.
+
+
 ***YAGNI: Your arent gonna need it(Martin Fowler)***
 - Always implement things when you need them, never when you just forsee them.
 - Do the simplest thing that could possibly work
@@ -2276,6 +2833,15 @@ Stream gzipStream = new GZipStream(fileStream, CompressionMode.Compress);
 - Model is similar to Entity (Model was in OOPs and Entity comes from DDD(Domain Driven Development))
 - All models dont necessarily become an entity, some of them become a service class also
 - Entity is like the implementation
+
+
+## Difference between Strategy Pattern and Bridge Pattern
+- The Strategy and Bridge patterns are both powerful design patterns, but they serve different purposes and are used in different contexts
+- Use Case of Strategy Pattern: When you have multiple ways of performing an operation and want to choose the algorithm at runtime.
+- Example of Strategy Pattern is Payment processing system where you can pay using different methods (Credit Card, PayPal, Bitcoin).
+- Use Case of Bridge Pattern:  When you want to separate an abstraction from its implementation so that both can be developed independently.
+- Example of Bridge Pattern: A drawing application where shapes (Circle, Square) can be drawn using different rendering engines (Vector, Raster).
+
 
 ## Design Patterns Summary
 

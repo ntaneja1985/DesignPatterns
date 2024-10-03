@@ -121,6 +121,38 @@ _kernel.Load(Assembly.GetExecutingAssembly());
 //Will Inject Oracle Dal
 MySupplier sup1 = _kernel.Get<MySupplier>(x=>x.Name=="O");
 
+var countryList = SingletonCache.GetCountries();
+countryList = null;
+
+var singletonInstance = Singleton.Instance;
+singletonInstance.DoSomething();
+
+Menu mainMenu = new Menu();
+mainMenu.SubMenu = new Menu();
+mainMenu.SubMenu.SubMenu = new Menu();
+
+SupplierClass supplierClass = new SupplierClass();
+supplierClass.Id = 1;
+supplierClass.Name = "Nishant";
+supplierClass.Address.City = "Chandigarh";
+Console.WriteLine(supplierClass.Id);
+SupplierClass suppClone = supplierClass.Clone();
+//Changing the clone should not affect the original object
+suppClone.Id = 2;
+supplierClass.Address.City = "Delhi";
+Console.WriteLine(suppClone.Id);
+
+//Memento Pattern
+SupplierRepository supplierRepository = new SupplierRepository();
+var supp1 = supplierRepository.Load();
+supp1.Name = "newTest";
+supp1.Revert();
+
+//Strategy Pattern
+var gstTax = new GstTaxDef();
+var taxContext = new TaxContext(gstTax);
+taxContext.CalculateTax(10);
+
 
 
 
