@@ -2819,8 +2819,85 @@ class Program
 - Usage: Demonstrates how to switch between different payment strategies at runtime.
 - This example shows how the Strategy pattern can be used to select and execute different algorithms (payment methods) at runtime, providing flexibility and modularity.
 
+## Difference between Strategy Pattern and Bridge Pattern
+- The Strategy and Bridge patterns are both powerful design patterns, but they serve different purposes and are used in different contexts
+- Use Case of Strategy Pattern: When you have multiple ways of performing an operation and want to choose the algorithm at runtime.
+- Example of Strategy Pattern is Payment processing system where you can pay using different methods (Credit Card, PayPal, Bitcoin).
+- Use Case of Bridge Pattern:  When you want to separate an abstraction from its implementation so that both can be developed independently.
+- Example of Bridge Pattern: A drawing application where shapes (Circle, Square) can be drawn using different rendering engines (Vector, Raster).
 
-***YAGNI: Your arent gonna need it(Martin Fowler)***
+
+# Module Revealing Pattern in Javascript
+- Global variables cause lot of issues
+- There is a need for self contained module which follows encapsulation and abstraction
+- We can make use of closures and IIFEs
+- Closure makes our function stateful
+- Mimics object oriented behaviour
+- To prevent name collisions, use IIFE
+- Module Revealing Pattern = Closure + IIFE
+- Pattern helps to create self-contained functions
+- The Revealing Module Pattern in JavaScript is a design pattern that helps organize code into modules, making it easier to manage and maintain
+- This pattern allows you to define all your variables and functions in a conventional way and then expose only the parts you want to be public
+
+## Key Concepts
+- Encapsulation: Keeps certain parts of the code private while exposing only the necessary parts.
+- Clarity: Clearly defines which methods and variables are public and which are private.
+- Consistency: Provides a consistent structure for your code, making it easier to read and understand.
+
+
+```javascript
+const CounterModule = (function() {
+    // Private variables and functions
+    let count = 0;
+
+    function increment() {
+        count++;
+    }
+
+    function decrement() {
+        count--;
+    }
+
+    function getCount() {
+        return count;
+    }
+
+    // Public API
+    return {
+        increment: increment,
+        decrement: decrement,
+        getCount: getCount
+    };
+})();
+
+// Usage
+CounterModule.increment();
+CounterModule.increment();
+console.log(CounterModule.getCount()); // Output: 2
+CounterModule.decrement();
+console.log(CounterModule.getCount()); // Output: 1
+
+```
+## Explanation
+- Private Variables and Functions: count, increment, decrement, and getCount are defined within the module and are not accessible from outside.
+- Public API: The return statement exposes the increment, decrement, and getCount functions, making them accessible from outside the module.
+- Usage: You can use the public methods to interact with the module, while the internal state (count) remains protected.
+
+## Advantages
+- Encapsulation: Keeps the internal state and helper functions private.
+- Clarity: Clearly shows which parts of the module are public and which are private.
+- Maintainability: Makes the code easier to maintain and understand.
+## Disadvantages
+- Testing: Private methods are not accessible for unit testing.
+- Overhead: Slightly more complex than simpler patterns like the basic Module Pattern.
+
+- The Revealing Module Pattern is particularly useful when you want to create a clean and maintainable structure for your JavaScript code
+
+# Retry and Circuit Breaker Pattern
+- If something goes wrong, try repeating the same operation again x number of times before giving up.
+- We create a policy as to when to retry and how many times to retry
+
+  ***YAGNI: Your arent gonna need it(Martin Fowler)***
 - Always implement things when you need them, never when you just forsee them.
 - Do the simplest thing that could possibly work
 - Dont do over-architecting
@@ -2834,14 +2911,10 @@ class Program
 - All models dont necessarily become an entity, some of them become a service class also
 - Entity is like the implementation
 
-
-## Difference between Strategy Pattern and Bridge Pattern
-- The Strategy and Bridge patterns are both powerful design patterns, but they serve different purposes and are used in different contexts
-- Use Case of Strategy Pattern: When you have multiple ways of performing an operation and want to choose the algorithm at runtime.
-- Example of Strategy Pattern is Payment processing system where you can pay using different methods (Credit Card, PayPal, Bitcoin).
-- Use Case of Bridge Pattern:  When you want to separate an abstraction from its implementation so that both can be developed independently.
-- Example of Bridge Pattern: A drawing application where shapes (Circle, Square) can be drawn using different rendering engines (Vector, Raster).
-
+- If 2 javascript files need to talk to each other, earlier commonJS was used. Everything that needs to be exported is put in a variable called exports
+- CommonJS uses an exports variable to enable communication between javascript files
+- Another type of module used nowadays is ES6
+- ES6 uses the concept of functions and IIFE and Closures
 
 ## Design Patterns Summary
 

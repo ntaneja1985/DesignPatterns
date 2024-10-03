@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <script>
+        function Customer()
+        {
+            var name = "Nishant";
+            var address = "";
+            //Gets created on the window object
+            this.name = "Nishant"
+            this.address = "some address"
+            //return {name: "Nishant", address: "some address"}
+        }
+        //Stateless function
+        function SomeFunc()
+        {
+            var x = 0;
+            x++;
+            alert(x);
+        }
+
+        function SomeFuncWithClosure()
+        {
+            var x = 0;
+            function Increment() //private
+            {
+                x++;
+            }
+            function GetValue() //private
+            {
+                return x;
+            }
+
+            function Init() //private
+            {
+
+            }
+            Init();
+            return {
+                increment: Increment,//make increment public
+                getValue: GetValue //make get value public
+            }
+        }
+
+    var x = SomeFuncWithClosure();
+    x.increment();
+    x.increment();
+    x.increment();
+    alert(x.getValue());
+
+    var y = SomeFuncWithClosure();
+    y.increment();
+    y.increment();
+    alert(y.getValue());
+
+
+    Customer();
+    alert(window.name);//Wrong
+    var x = new Customer();
+    console.log(x);
+    alert(x.name);
+    </script>
+</body>
+</html>

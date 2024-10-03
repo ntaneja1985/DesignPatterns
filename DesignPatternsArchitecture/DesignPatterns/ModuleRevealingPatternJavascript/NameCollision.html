@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        //IIFE
+        var CustomerNameSpace = (function()
+        {
+            var name = '';
+            var address = '';
+            function _setName(val)
+            {
+                name = val;
+            }
+            function _setAddress(val)
+            {
+                address = val;
+            }
+            function getName()
+            {
+                return name;
+            }
+            return {
+                setName: _setName,
+                setAddress: _setAddress,
+                getName: getName
+            }
+        } 
+    )();
+        //var cust = new Customer();
+        //cust.setName("Nishant");
+        //alert(cust.getName());
+        CustomerNameSpace.setName("Hello22");
+        console.log(CustomerNameSpace.getName());
+
+        var Customer = "";
+    </script>
+</body>
+</html>
