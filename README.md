@@ -2894,10 +2894,395 @@ console.log(CounterModule.getCount()); // Output: 1
 - The Revealing Module Pattern is particularly useful when you want to create a clean and maintainable structure for your JavaScript code
 
 # Retry and Circuit Breaker Pattern
+- Most used in microservices to handle transient failures
 - If something goes wrong, try repeating the same operation again x number of times before giving up.
 - We create a policy as to when to retry and how many times to retry
+- Circuit Breaker pattern is little different
+- It is like an electrical circuit
+- In circuit breaker, if there is an exception try again but keep track of the number of attempts
+- As soon as the number of attempts crosses a certain threshold, open the circuit and go into a semi open state.
+- Circuit breaker pattern has 3 states: open state, semi-open state, closed state.
+- Retry Pattern—a classic for handling transient failures! Think of it as the "try, try again" mantra for your code.
+- Essentially, if an operation fails, it waits for a bit and then tries again, repeating this process until it either succeeds or hits a retry limit. 
+- Super handy when dealing with unreliable network connections or other intermittent issues.
 
-  ***YAGNI: Your arent gonna need it(Martin Fowler)***
+```c#
+using System;
+using System.Threading;
+
+class Program
+{
+    static void Main()
+    {
+        int maxRetryAttempts = 3;
+        TimeSpan pauseBetweenFailures = TimeSpan.FromSeconds(2);
+        RetryPolicy(maxRetryAttempts, pauseBetweenFailures, PerformOperation);
+    }
+
+    static void RetryPolicy(int maxRetryAttempts, TimeSpan pauseBetweenFailures, Action operation)
+    {
+        int attempt = 0;
+        while (attempt < maxRetryAttempts)
+        {
+            try
+            {
+                operation();
+                return;
+            }
+            catch (Exception ex)
+            {
+                attempt++;
+                if (attempt >= maxRetryAttempts)
+                {
+                    Console.WriteLine($"Operation failed after {maxRetryAttempts} attempts.");
+                    throw;
+                }
+                Console.WriteLine($"Attempt {attempt} failed: {ex.Message}. Retrying in {pauseBetweenFailures.TotalSeconds} seconds...");
+                Thread.Sleep(pauseBetweenFailures);
+            }
+        }
+    }
+
+    static void PerformOperation()
+    {
+        // Simulate an operation that may fail
+        Random random = new Random();
+        int chance = random.Next(0, 5);
+        if (chance < 3) // 60% chance of failure
+        {
+            throw new Exception("Random failure occurred.");
+        }
+        Console.WriteLine("Operation succeeded.");
+    }
+}
+
+```
+
+- In this example, PerformOperation() simulates an operation that can fail. 
+- The RetryPolicy() method will keep attempting the operation until it either succeeds or reaches the maximum number of retry attempts.
+
+# Circuit Breaker Pattern
+- Circuit Breaker Pattern is a resilient design pattern that prevents an application from performing an operation that's likely to fail.
+- Think of it like a fuse in an electrical system: if the system detects too many failures, it "breaks" the circuit to prevent further failures until the system recovers.
+
+```c#
+using System;
+using System.Threading;
+
+class CircuitBreaker
+{
+    private readonly int _failureThreshold;
+    private readonly TimeSpan _circuitResetTimeout;
+    private int _failureCount;
+    private DateTime _lastFailureTime;
+    private bool _circuitOpen;
+
+    public CircuitBreaker(int failureThreshold, TimeSpan circuitResetTimeout)
+    {
+        _failureThreshold = failureThreshold;
+        _circuitResetTimeout = circuitResetTimeout;
+        _failureCount = 0;
+        _lastFailureTime = DateTime.MinValue;
+        _circuitOpen = false;
+    }
+
+    public void Execute(Action operation)
+    {
+        if (_circuitOpen)
+        {
+            if (DateTime.UtcNow - _lastFailureTime >= _circuitResetTimeout)
+            {
+                _circuitOpen = false;
+                _failureCount = 0;
+            }
+            else
+            {
+                throw new CircuitOpenException();
+            }
+        }
+
+        try
+        {
+            operation();
+        }
+        catch
+        {
+            _failureCount++;
+            _lastFailureTime = DateTime.UtcNow;
+
+            if (_failureCount >= _failureThreshold)
+            {
+                _circuitOpen = true;
+            }
+
+            throw;
+        }
+    }
+}
+
+class CircuitOpenException : Exception
+{
+    public CircuitOpenException() : base("Circuit is open. Operation not allowed.")
+    {
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        CircuitBreaker circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(5));
+
+        for (int i = 0; i < 10; i++)
+        {
+            try
+            {
+                circuitBreaker.Execute(PerformOperation);
+            }
+            catch (CircuitOpenException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Operation failed: {ex.Message}");
+            }
+
+            Thread.Sleep(1000);
+        }
+    }
+
+    static void PerformOperation()
+    {
+        // Simulate an operation that may fail
+        Random random = new Random();
+        int chance = random.Next(0, 5);
+        if (chance < 3) // 60% chance of failure
+        {
+            throw new Exception("Random failure occurred.");
+        }
+        Console.WriteLine("Operation succeeded.");
+    }
+}
+
+```
+- In this example, CircuitBreaker keeps track of failure counts and opens the circuit if the number of failures reaches the specified threshold. 
+- If the circuit is open, any attempts to execute the operation will throw a CircuitOpenException. 
+- The circuit will automatically close after a timeout period, allowing operations to be retried. 
+
+# Polly is a great library for handling transient faults and implementing resilience strategies in .NET.
+https://dev.to/supriyasrivatsa/retry-vs-circuit-breaker-346o
+```c#
+using System;
+using System.Net.Http;
+using Polly;
+using Polly.Retry;
+
+class Program
+{
+    static void Main()
+    {
+        // Define the retry policy
+        RetryPolicy<HttpResponseMessage> retryPolicy = Policy
+            .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+            .Or<HttpRequestException>()
+            .WaitAndRetry(new[]
+            {
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(2),
+                TimeSpan.FromSeconds(4)
+            });
+
+        // Example usage with HttpClient
+        using (HttpClient httpClient = new HttpClient())
+        {
+            try
+            {
+                HttpResponseMessage response = retryPolicy.Execute(() => httpClient.GetAsync("https://example.com").Result);
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Request succeeded.");
+                }
+                else
+                {
+                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Request failed after retries: {ex.Message}");
+            }
+        }
+    }
+}
+
+```
+
+- In this example, the RetryPolicy is configured to retry the HTTP request if the response is not successful (i.e., status code not in the 200-299 range) or if a HttpRequestException is thrown. 
+- The policy waits for 1 second before the first retry, 2 seconds before the second retry, and 4 seconds before the third retry.
+
+# Circuit Breaker Pattern Another Implementation
+
+```c#
+public class CircuitBreaker
+    {
+        private Action _currentAction;
+        private int _failureCount = 0;
+        private System.Timers.Timer _timer = null;
+        private readonly int _timeout = 0;
+        private readonly int _threshold = 0;
+
+        private CircuitState State { get; set; }
+        public enum CircuitState
+        {
+            Closed,
+            Open,
+            HalfOpen
+        }
+        public CircuitBreaker(int threshold, int timeout) 
+        { 
+            State = CircuitState.Closed;
+           _timeout = timeout;
+            _threshold = threshold;
+        }
+
+        public void ExecuteAction(Action action)
+        {
+            _currentAction = action;
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                _failureCount++;
+                if(State == CircuitState.HalfOpen)
+                {
+                    return;
+                }
+                if(_failureCount <= _threshold)
+                {
+                    Console.WriteLine("Trying..."+_failureCount+"times");
+                    Invoke();
+                }
+
+                else if (_failureCount > _threshold)
+                {
+                    Trip();
+                }
+            }
+        }
+
+        public void Invoke()
+        {
+            ExecuteAction(_currentAction);
+        }
+
+        public void Trip() 
+        { 
+            if(State != CircuitState.Open)
+            {
+                ChangeState(CircuitState.Open);
+            }
+            _timer = new System.Timers.Timer(_timeout);
+            _timer.Elapsed += TimerElapsed;
+            _timer.Start();
+        }
+
+        public void ChangeState(CircuitState state) { }
+        public void Reset()
+        {
+            ChangeState(CircuitState.Closed);
+            _timer.Stop();
+        }
+
+        private void TimerElapsed(object sender,  System.Timers.ElapsedEventArgs e)
+        {
+            Console.WriteLine("One last try");
+            if(State == CircuitState.Open)
+            {
+                ChangeState(CircuitState.HalfOpen);
+                _timer.Elapsed -= TimerElapsed;
+                _timer.Stop();
+                Invoke();
+            }
+        }
+    }
+
+//Usage
+try
+{
+    CircuitBreaker circuitBreaker = new CircuitBreaker(3, 5);
+    circuitBreaker.ExecuteAction(SendRequest);
+}
+catch (Exception ex)
+{
+    Console.WriteLine("Circuit is open");
+}
+```
+
+# Circuit Breaker using Polly
+
+```c#
+using System;
+using System.Net.Http;
+using Polly;
+using Polly.CircuitBreaker;
+
+class Program
+{
+    static void Main()
+    {
+        // Define the circuit breaker policy
+        CircuitBreakerPolicy<HttpResponseMessage> circuitBreakerPolicy = Policy
+            .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+            .Or<HttpRequestException>()
+            .CircuitBreaker(
+                handledEventsAllowedBeforeBreaking: 2,
+                durationOfBreak: TimeSpan.FromSeconds(10)
+            );
+
+        // Example usage with HttpClient
+        using (HttpClient httpClient = new HttpClient())
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                try
+                {
+                    HttpResponseMessage response = circuitBreakerPolicy.Execute(() => httpClient.GetAsync("https://example.com").Result);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Request succeeded.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                    }
+                }
+                //Semi-open state
+                catch (BrokenCircuitException ex)
+                {
+                    Console.WriteLine($"Circuit is open: {ex.Message}");
+                }
+                //Last attempt
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Request failed: {ex.Message}");
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
+    }
+}
+
+```
+
+- In this example, the CircuitBreakerPolicy allows 2 failed attempts before breaking the circuit for 10 seconds. 
+- If the circuit is open, any calls through the policy will immediately throw a BrokenCircuitException.
+- Circuit Breaker + Polly = resilience magic
+ 
+***YAGNI: Your arent gonna need it(Martin Fowler)***
 - Always implement things when you need them, never when you just forsee them.
 - Do the simplest thing that could possibly work
 - Dont do over-architecting

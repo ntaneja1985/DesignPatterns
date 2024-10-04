@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using DesignPatterns;
 using Ninject;
+using Polly;
 using System.Reflection;
 using static DesignPatterns.IEvent;
 
@@ -153,7 +154,49 @@ var gstTax = new GstTaxDef();
 var taxContext = new TaxContext(gstTax);
 taxContext.CalculateTax(10);
 
+//Circuit Breaker Pattern
+try
+{
+    Action send = SendRequest;
+    RetryHelper.RetryOnException(3, new TimeSpan(0, 0, 5), send);
+}
+catch(Exception ex)
+{
+    Console.WriteLine("Tired of calling....we are done");
+}
+ 
+ static void SendRequest()
+{
+    throw new Exception("some exception occurred");
+}
 
+//Using Polly for Retry Pattern
+var httpClient = new HttpClient();
+var maxRetryAttempts = 3;
+var pauseBetweenFailures = TimeSpan.FromSeconds(5);
+//create a policy
+var retryPolicy = Policy
+                  .Handle<HttpRequestException>()
+                  .WaitAndRetryAsync(maxRetryAttempts, i => pauseBetweenFailures);
+//attach the method with the policy
+await retryPolicy.ExecuteAsync(async () =>
+{
+    Console.WriteLine("Retry");
+    var response = await httpClient.DeleteAsync("https://example111.com/api/products/1");
+    response.EnsureSuccessStatusCode();
+});
+
+try
+{
+    CircuitBreaker circuitBreaker = new CircuitBreaker(3, 5);
+    circuitBreaker.ExecuteAction(SendRequest);
+}
+catch (Exception ex)
+{
+    Console.WriteLine("Circuit is open");
+}
+
+//Polly Example
 
 
 
