@@ -846,12 +846,12 @@ public class Customer : ICustomer
 
 1. The context map is where the magic happens. 
 2. It's a visual representation of how these bounded contexts interact with each other. Think of it as a subway map connecting different lines (contexts). Some lines intersect, some run parallel, and some are express trains hurtling through the night. The context map ensures they all play nice and have the right contact points.
-3. Shared Kernel: Sometimes, two contexts need to hold hands and share a little code. It's like when Batman teams up with Superman—except with fewer capes. The shared kernel allows them to collaborate without stepping on each other's toes.
-4. Customer-Supplier Relationship: One context might provide services to another. It's like the local bakery supplying fresh baguettes to the café next door. In DDD, we call this a customer-supplier relationship. No invoices involved, though.
-5. Conformist: Some contexts are rule followers—they conform to the rules set by another context. It's like a teenager reluctantly following curfew because their parents said so. These conformist contexts adapt to maintain harmony.
+3. Shared Kernel: Sometimes, two contexts need to hold hands and share a little code. It's like when Batman teams up with Supermanï¿½except with fewer capes. The shared kernel allows them to collaborate without stepping on each other's toes.
+4. Customer-Supplier Relationship: One context might provide services to another. It's like the local bakery supplying fresh baguettes to the cafï¿½ next door. In DDD, we call this a customer-supplier relationship. No invoices involved, though.
+5. Conformist: Some contexts are rule followersï¿½they conform to the rules set by another context. It's like a teenager reluctantly following curfew because their parents said so. These conformist contexts adapt to maintain harmony.
 6. Anticorruption Layer: Imagine a translator at the United Nations. The anticorruption layer ensures that when Context A speaks Klingon, Context B understands it in plain English. It shields your precious domain model from foreign invaders.
 7. Open Host Service: This is like throwing a neighborhood block party. One context opens up its services to others. It's all about sharing the love (and endpoints).
-8. Published Language: When contexts need to gossip, they use a common dictionary—the published language. It's like having a secret codebook for spies. 
+8. Published Language: When contexts need to gossip, they use a common dictionaryï¿½the published language. It's like having a secret codebook for spies. 
 
 # Iterator Pattern
 
@@ -865,7 +865,7 @@ public class Customer : ICustomer
 - Iterator just allows us to enumerate the internal elements of an object without exposing their types
 - Iterator pattern is going through elements of aggregate root object without exposing its data structure.
 
-Key Concepts
+### Key Concepts
 - Iterator: An interface or abstract class that defines methods for accessing and traversing elements.
 - ConcreteIterator: A class that implements the Iterator interface and keeps track of the current position in the traversal.
 - Aggregate: An interface or abstract class that defines a method for creating an Iterator object.
@@ -1047,12 +1047,12 @@ public void Add(IAddress addr)
 - The Bridge Design Pattern is all about decoupling an abstraction from its implementation. 
 - Abstraction means interfaces and implementation is a class that implements the interface
 - Uses encapsulation and aggregation and can use inheritance to separate responsibilities into different classes
-- Imagine you have this fancy abstraction (let's call it "Abstractionville") that wants to do some cool stuff, but it doesn't want to be tied down to a specific implementation. It's like Abstractionville wants to date around without committing to anyone—very modern, I must say!
+- Imagine you have this fancy abstraction (let's call it "Abstractionville") that wants to do some cool stuff, but it doesn't want to be tied down to a specific implementation. It's like Abstractionville wants to date around without committing to anyoneï¿½very modern, I must say!
 
 - Bridge splits things into two parts:
 
-1. Abstraction: This is the high-level stuff—the part that Abstractionville interacts with. It's like the front-end of your app, blissfully unaware of the nitty-gritty details.
-2. Implementation: This is where the real action happens—the back-end. It's like the engine room of a spaceship. The Implementation part handles the actual work, but it doesn't care about Abstractionville's drama. It's stoic like that.
+1. Abstraction: This is the high-level stuffï¿½the part that Abstractionville interacts with. It's like the front-end of your app, blissfully unaware of the nitty-gritty details.
+2. Implementation: This is where the real action happensï¿½the back-end. It's like the engine room of a spaceship. The Implementation part handles the actual work, but it doesn't care about Abstractionville's drama. It's stoic like that.
 
 ```c#
 
@@ -1094,7 +1094,7 @@ smsSender.SendMessage("Hey there, Copilot!");
 ```
 
 ### When to use Bridge Pattern
--When to Use It: Whenever you find yourself juggling different implementations for the same abstraction—like choosing between pizza toppings without committing to just one. 
+-When to Use It: Whenever you find yourself juggling different implementations for the same abstractionï¿½like choosing between pizza toppings without committing to just one. 
 
 ### Abstraction is also like our interface: ICustomer
 - Not the job of ICustomer to do Validation, we should have a different interface to do Validation
@@ -1131,7 +1131,7 @@ Before we explore the pattern, let's understand the problem it aims to solve. Im
 
 However, this approach has drawbacks:
 
-1. Code Duplication: If you have multiple controllers or services that manipulate the same data (e.g., an Employee entity), you’ll end up duplicating the data access code. Any changes to this logic would require updates in multiple places.
+1. Code Duplication: If you have multiple controllers or services that manipulate the same data (e.g., an Employee entity), youï¿½ll end up duplicating the data access code. Any changes to this logic would require updates in multiple places.
 2. Tight Coupling: Embedding data access logic directly in controllers tightly couples them to the database implementation. This makes your code less maintainable and harder to test.
 
 ## Implementation of Repository Pattern
@@ -1237,7 +1237,7 @@ public bool Compare(int num1, int num2)
 
 # Adapter Pattern
 - Adapter Design Pattern is a structural pattern that allows objects with incompatible interfaces to work together. 
-- Imagine you have two systems or classes—let's call them System A and System B. They need to collaborate, but their interfaces don't match. The adapter acts as a bridge between them, making communication possible.
+- Imagine you have two systems or classesï¿½let's call them System A and System B. They need to collaborate, but their interfaces don't match. The adapter acts as a bridge between them, making communication possible.
 - It acts like a wrapper
 - Adapter pattern is a wrapper on top of objects or classes that cannot be modified: they can be third party or internal objects and classes
 - 2 types of adapters: Object Adapter and Class Adapter
@@ -1712,8 +1712,8 @@ class Program
 - Inheritance for complex object creation, uses permutation and combination(remember Gold Customer, VAT Tax, Courier Delivery)
 ***Many developers think centralizing the object creation is Factory Pattern: Wrong!!!***
 ***Simple Factory Pattern is not Factory Method Pattern***
-- This pattern is particularly useful when the exact type of object to be created isn’t known until runtime.
-- Let’s consider a scenario where we need to create different types of credit cards. We will use the Factory Pattern to create instances of different credit card types based on user input.
+- This pattern is particularly useful when the exact type of object to be created is not known until runtime.
+- Let's consider a scenario where we need to create different types of credit cards. We will use the Factory Pattern to create instances of different credit card types based on user input.
 - If we have multiple combination of objects that need to be created use the Factory Pattern
 - Look at the case of Special Customer where we need to do Tax Calculation and Delivery as well(example in FactoryPattern.cs)
 - Dont use if-else or switch statement in Factory Pattern
@@ -2538,7 +2538,7 @@ class Program
 - Caretaker: The object that keeps track of the Memento but does not modify or inspect its contents.
 
 Example in C#
-Let’s consider a simple text editor where you can type text and undo changes.
+Letï¿½s consider a simple text editor where you can type text and undo changes.
 
 ```c#
 \\Originator Class
@@ -2643,7 +2643,7 @@ class Program
 
 # Flyweight Design Pattern
 - The Flyweight pattern is a structural design pattern that helps minimize memory usage by sharing as much data as possible with similar objects. 
-- It’s particularly useful when you need to create a large number of objects that share common properties
+- Itï¿½s particularly useful when you need to create a large number of objects that share common properties
 - Information which is common in nature for various objects--> put them in a common object
 - Useful when we deal with large number of objects with simple repeated elements that would use large amount of memory if individually stored.
 - It is common to hold shared data in external data structures and pass it to the objects temporarily when they are used.
@@ -2738,7 +2738,7 @@ class Program
 
 
 ## Example in C#
-Let’s consider an example where we have a payment system that can process payments using different methods like credit card, PayPal, and Bitcoin.
+Letï¿½s consider an example where we have a payment system that can process payments using different methods like credit card, PayPal, and Bitcoin.
 
 ```c#
 \\Strategy Interface
@@ -2902,7 +2902,7 @@ console.log(CounterModule.getCount()); // Output: 1
 - In circuit breaker, if there is an exception try again but keep track of the number of attempts
 - As soon as the number of attempts crosses a certain threshold, open the circuit and go into a semi open state.
 - Circuit breaker pattern has 3 states: open state, semi-open state, closed state.
-- Retry Pattern—a classic for handling transient failures! Think of it as the "try, try again" mantra for your code.
+- Retry Patternï¿½a classic for handling transient failures! Think of it as the "try, try again" mantra for your code.
 - Essentially, if an operation fails, it waits for a bit and then tries again, repeating this process until it either succeeds or hits a retry limit. 
 - Super handy when dealing with unreliable network connections or other intermittent issues.
 
@@ -3316,7 +3316,7 @@ class Program
 
 
 - Adapter:	Match interfaces of different classes
-- Bridge:	Separates an object’s interface from its implementation
+- Bridge:	Separates an objectï¿½s interface from its implementation
 - Composite:	A tree structure of simple and composite objects
 - Decorator:	Add responsibilities to objects dynamically
 - Facade:	A single class that represents an entire subsystem
@@ -3338,3 +3338,376 @@ class Program
 - Template Method:	Defer the exact steps of an algorithm to a subclass
 - Visitor:	Defines a new operation to a class without change
 
+## Design Patterns Interview Questions by Shivprasad Koirala Lecture on 11/01/2025
+
+- Which design pattern have you used?
+- Keep 4-5 patterns very handy in your hand
+- Singleton
+- Factory
+- Repository,
+- CQRS
+- Abstract Factory
+
+### Singleton Pattern
+- Helps us to create a single instance of an object
+```c#
+public class Singleton
+{
+    private static readonly object lockObject = new object();
+    
+    //Private Constructor to make the class Singleton
+    private Singleton()
+    {
+
+    }
+    private static Singleton _instance
+
+    public static Singleton Instance 
+    {
+        // Double NULL check for Thread Safety
+        get {
+            if(_instance == null)
+            {
+                lock(lockObject)
+                {
+                    if(_instance == null)
+                    {
+                    _instance = new Singleton()
+                    }
+                }
+            }
+        }
+    }
+
+    public static IEnumerable<Country> GetCountries()
+    {
+    //only one thread will run
+    //Double NULL check in Singleton 
+
+    //Lock Performance
+    if (_countries == null)
+    {
+        //Lock Keyword is CPU intensive though.
+        lock (lockObject) //Thread Safety
+        {
+            if(_countries == null) //Lazy Loading
+            {
+                _countries = new List<Country>();
+                _countries.Add(new Country() { Id = 1, Name = "India" });
+                _countries.Add(new Country() { Id = 2, Name = "USA" });
+            }
+        }
+    }
+
+    //return a Clone of the countries object so that original _countries object is not modified
+    return _countries.ToList<Country>();
+    }
+}
+
+
+//Usage
+var countryList = Singleton.GetCountries();
+countryList = null;
+
+var singletonInstance = Singleton.Instance;
+singletonInstance.DoSomething();
+
+```
+
+### Static vs Singleton
+- If we make Singleton class as static, we lose a lot of OOPs features
+- It forces us to call the static object of the singleton class
+- Using Lazy Keyword we can get rid of the double null check and Lazy Keyword is thread safe by default
+
+```c#
+public sealed class Singleton
+    {
+        private static readonly Lazy<Singleton> lazyInstance = new Lazy<Singleton>(() => new Singleton());
+
+        //Private constructor to prevent instantiation from outside
+        private Singleton() { }
+
+        //Public Property to provide Access from Outside
+        public static Singleton Instance { get { return lazyInstance.Value; } }
+
+        public void DoSomething()
+        {
+            Console.WriteLine("Singleton instance called");
+        }
+    }
+
+    //Usage
+    var singletonInstance = Singleton.Instance;
+    singletonInstance.DoSomething();
+
+```
+- It is optional to make the Singleton class sealed.
+- In EFCore, if we use Services.AddSingleton<> while registering dependency it is not singleton pattern, it just create a single instance of that object. Here anyone can access that singleton instance and make its properties as null. 
+- AddSingleton keyword is a misnomer above. It should be something Service.AddGlobalObject()
+- It has no data safety and its data can be easily manipulated
+- Design Patterns are time tested solutions for particular problems
+- Singleton Pattern is used in Caching, Logging scenarios.
+- ![alt text](image.png)
+- Dont use Singleton pattern for Connection Pooling from a database perspective. Dont use global objects for creating connections to the database.
+
+
+## Repository Pattern
+- Repository pattern sits between our domain models and the data access layer
+- Helps us to change our data access technology.
+- It is mediator between our domain model and data access layer
+- Repository pattern doesnot care whether we use Dapper or EFCore.
+- ![alt text](image-1.png)
+- We have UnitOfWork along with Repository Pattern
+- UnitOfWork ensures all the repositories save as one single transaction, either the whole unit passes or the whole unit rolls back.
+```c#
+ public interface IRepository<T> where T : class
+{
+    //Add to memory
+    bool Add(T entity);    
+    //Save to database
+    bool Save(T obj);
+    bool Update(T obj);
+    IEnumerable<T> GetAll();
+    IEnumerable<T> Search(int id);
+}
+
+public abstract class RepositoryBase<T> : IRepository<T> where T: class
+{
+    public List<T> list { get; set; } = new List<T>();
+
+    public bool Add(T entity)
+    {
+        this.list.Add(entity);
+        return true;
+    }
+
+    public abstract IEnumerable<T> GetAll();
+
+    public abstract bool Save(T obj);
+
+    public abstract IEnumerable<T> Search(int id);
+
+    public abstract bool Update(T obj);
+    
+}
+public class RepositoryCustomer : RepositoryBase<Customer>
+{
+    public override IEnumerable<Customer> GetAll()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool Save(Customer obj)
+    {
+        //code for ef core to save to DB
+        return true;
+    }
+
+    public override IEnumerable<Customer> Search(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool Update(Customer obj)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+
+//Usage
+
+IRepository<Customer> rep1 = null;
+rep1.Add(new Customer())
+rep1.Save();
+```
+- ![alt text](image-2.png)
+- Repository Pattern is an abstraction over heterogeneous data sources and decouples the Client from data access layer implementations like EF/ADO/Dapper
+- Repository pattern helps us in Unit Testing.
+  
+  ## Unit of Work Pattern 
+  - Unit of Work helps to implement transactions inside a repository.
+  - Lets say we have customer and supplier and we want both of them to commit in one transactions, then we use unit of work pattern.
+  - The Unit of Work pattern in C# is a design pattern often used to manage and handle transactions involving multiple operations and entities within a single business process.
+  - It ensures data consistency and integrity by providing a way to group operations into a single "unit of work" which can then be committed or rolled back as a complete transaction.
+  - The Unit of Work pattern is typically used in conjunction with the Repository pattern to encapsulate the database access layer. Each repository represents a collection of objects of a certain type (like tables in a database), and the Unit of Work coordinates the work between these repositories.
+  - Transaction Management: It keeps track of all changes that occur during a transaction and ensures that all changes are either committed or rolled back together, maintaining consistency.
+  - Performance: By managing operations in a batch rather than piecemeal, it can minimize database round-trips and improve performance.
+  
+  ```c#
+    public interface IUnitOfWork : IDisposable
+   {
+    ICustomerRepository Customers { get; }  // Add repositories as needed.
+    IOrderRepository Orders { get; }
+
+    int Complete();
+   }
+
+    public class UnitOfWork : IUnitOfWork
+  {
+    private readonly ApplicationDbContext _context;
+
+    public UnitOfWork(ApplicationDbContext context)
+    {
+        _context = context;
+        Customers = new CustomerRepository(_context);
+        Orders = new OrderRepository(_context);
+    }
+
+    public ICustomerRepository Customers { get; private set; }
+    public IOrderRepository Orders { get; private set; }
+
+    public int Complete()
+    {
+        return _context.SaveChanges();
+    }
+
+    public void Dispose()
+     {
+        _context.Dispose();
+     }
+   }
+
+  ```
+  - Usage is as follows:
+  ```c#
+    //Usage 
+      public class OrderService
+   {
+        private readonly IUnitOfWork _unitOfWork;
+
+    public OrderService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    public void ProcessOrder(Order order)
+    {
+        _unitOfWork.Customers.Add(order.Customer);
+        _unitOfWork.Orders.Add(order);
+        _unitOfWork.Complete();
+    }
+   }
+
+
+  ```
+
+  ## Mock Testing using xUnit
+  ```c#
+   public class UnitTest1
+   {
+    public bool FakeSave()
+    {
+        return true;
+    }
+    [Fact]
+    public void Test1()
+    {
+        var mockRepo = new Mock<IRepository<Customer>>();
+        mockRepo.Setup(x=>x.Save(new Customer())).Returns(FakeSave);
+
+        IRepository<Customer> rep = FactoryRepository<Customer>.Create();
+        var result = rep.Save(new Customer());
+        Assert.True(result);
+    }
+  }
+
+  ```
+
+## How can Adapter Pattern and Repository Pattern work together ?
+- Repository is used where at back we can have either EF or ADO.NET, both have different ways to save the data to DB. To make it compatible and give a unique way, adapter comes in picture
+- Compatibility can be done if the repository implements an interface, we can create a new class that implements that interface and internally calls the incompatible library
+- Unit of work also is related to Adapter Pattern as it implements transactions internally and provides wrapper methods over them.
+- Any changes related to DB in the DI, should be scoped or transient
+
+
+## Factory Pattern 
+- Helps to centralize the object creation
+- Why we need Factory Pattern 
+- **Encapsulation of Object Creation**: The Factory Pattern encapsulates the object creation process, allowing you to centralize and manage complex creation logic in one place. 
+- This makes the code more maintainable and easier to modify in the future.
+- **Decoupling Clients from Concrete Implementations**: By using the Factory Pattern, the client code only depends on the interface or abstract class, not the concrete implementations.
+- This decoupling improves the modularity of the application and makes it easier to change or extend without affecting the client code.
+- **Promotion of Code Reuse**: Since the object creation logic is centralized in the factory, any changes to the creation process are localized, promoting reuse of the code across the application.
+- **Support for Varying Data**: The Factory Pattern can return different objects based on the input parameters or configuration. This is useful in scenarios where the object creation needs to vary dynamically.
+- Consider an application that needs different types of notifications, such as email, SMS, and push notifications. Without the Factory Pattern, the client code would need to know about all the different implementations and handle the creation of these instances.
+- Without Factory Pattern 
+```c#
+  public void SendNotification(string type, string message)
+{
+    if (type == "Email")
+    {
+        var emailNotifier = new EmailNotifier();
+        emailNotifier.Send(message);
+    }
+    else if (type == "SMS")
+    {
+        var smsNotifier = new SmsNotifier();
+        smsNotifier.Send(message);
+    }
+    else if (type == "Push")
+    {
+        var pushNotifier = new PushNotifier();
+        pushNotifier.Send(message);
+    }
+}
+
+
+```
+- With Factory Pattern 
+```c#
+  // Step 1: Define an interface for notifications
+public interface INotifier
+{
+    void Send(string message);
+}
+
+// Step 2: Implement concrete notification classes
+public class EmailNotifier : INotifier
+{
+    public void Send(string message)
+    {
+        // Send email notification
+    }
+}
+
+public class SmsNotifier : INotifier
+{
+    public void Send(string message)
+    {
+        // Send SMS notification
+    }
+}
+
+public class PushNotifier : INotifier
+{
+    public void Send(string message)
+    {
+        // Send push notification
+    }
+}
+
+// Step 3: Create a factory class
+public static class NotifierFactory
+{
+    public static INotifier CreateNotifier(string type)
+    {
+        return type switch
+        {
+            "Email" => new EmailNotifier(),
+            "SMS" => new SmsNotifier(),
+            "Push" => new PushNotifier(),
+            _ => throw new ArgumentException("Invalid notifier type"),
+        };
+    }
+}
+
+// Step 4: Use the factory in client code
+public void SendNotification(string type, string message)
+{
+    var notifier = NotifierFactory.CreateNotifier(type);
+    notifier.Send(message);
+}
+
+
+```

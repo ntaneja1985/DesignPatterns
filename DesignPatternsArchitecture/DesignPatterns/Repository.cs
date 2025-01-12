@@ -12,6 +12,7 @@ namespace DesignPatterns
         bool Add(T entity);    
         //Save to database
         bool Save(T obj);
+        bool Update(T obj);
         IEnumerable<T> GetAll();
         IEnumerable<T> Search(int id);
     }
@@ -22,7 +23,7 @@ namespace DesignPatterns
 
         public bool Add(T entity)
         {
-            list.Add(entity);
+            this.list.Add(entity);
             return true;
         }
 
@@ -31,6 +32,8 @@ namespace DesignPatterns
         public abstract bool Save(T obj);
 
         public abstract IEnumerable<T> Search(int id);
+
+        public abstract bool Update(T obj);
         
     }
     public class RepositoryCustomer : RepositoryBase<Customer>
@@ -47,6 +50,11 @@ namespace DesignPatterns
         }
 
         public override IEnumerable<Customer> Search(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool Update(Customer obj)
         {
             throw new NotImplementedException();
         }
