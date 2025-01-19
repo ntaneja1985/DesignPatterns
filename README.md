@@ -2449,6 +2449,11 @@ class Program
 - Helps us to create clones of objects
 - For shallow cloning use this.MemberwiseClone() and for deep cloning use serialization or create clone() methods for each of the reference types
 - Can use ICloneable interface also
+- The Prototype Pattern is not as widely used as some other patterns, but it finds its niche in specific scenarios:
+- Game Development: Creating game objects with various configurations.
+- Document Processing: Cloning document templates for batch processing.
+- Graphical Applications: Managing complex graphical objects.
+- In summary, while the Prototype Pattern may not be ubiquitous, it is quite powerful when applied to the right problem domain.
 ## Key Concepts
 - Prototype Interface: Declares a method for cloning itself.
 - Concrete Prototype: Implements the cloning method to create a copy of itself.
@@ -3623,6 +3628,7 @@ rep1.Save();
 
 ## Factory Pattern 
 - Helps to centralize the object creation
+- Uses Subclasses to create objects
 - Why we need Factory Pattern 
 - **Encapsulation of Object Creation**: The Factory Pattern encapsulates the object creation process, allowing you to centralize and manage complex creation logic in one place. 
 - This makes the code more maintainable and easier to modify in the future.
@@ -3630,6 +3636,24 @@ rep1.Save();
 - This decoupling improves the modularity of the application and makes it easier to change or extend without affecting the client code.
 - **Promotion of Code Reuse**: Since the object creation logic is centralized in the factory, any changes to the creation process are localized, promoting reuse of the code across the application.
 - **Support for Varying Data**: The Factory Pattern can return different objects based on the input parameters or configuration. This is useful in scenarios where the object creation needs to vary dynamically.
+- ![alt text](image-5.png)
+- ![alt text](image-6.png)
+- ![alt text](image-7.png)
+- ![alt text](image-8.png)
+- ![alt text](image-9.png)
+- ![alt text](image-10.png)
+- ![alt text](image-11.png)
+- ![alt text](image-12.png)
+- ![alt text](image-13.png)
+- In the above code, we wrote a Default Factory. 
+- ![alt text](image-14.png)
+- What if we want to create a new instance of a Senior Discount
+- ![alt text](image-15.png)
+- ![alt text](image-16.png)
+- Factory pattern needs an interface which defines how the object is created 
+- Factory pattern will delegate object creation to the sub-classes like in the above image using virtual and override methods. 
+- ![alt text](image-17.png)
+- ![alt text](image-18.png)
 - Consider an application that needs different types of notifications, such as email, SMS, and push notifications. Without the Factory Pattern, the client code would need to know about all the different implementations and handle the creation of these instances.
 - Without Factory Pattern 
 ```c#
@@ -3711,3 +3735,114 @@ public void SendNotification(string type, string message)
 
 
 ```
+
+## Abstract Factory Pattern 
+- ![alt text](image-19.png)
+- Abstract Pattern sits on top of Factory Pattern. 
+- ![alt text](image-20.png)
+- ![alt text](image-21.png)
+
+## Why are you using Singleton pattern? Why dont you use Cache ?
+- Cache can be manipulated. Someone can clear the cache. Singleton pattern is protected. 
+- Singleton pattern has a single point of truth. 
+
+
+## Inversion of Control and DI 
+- ![alt text](image-3.png)
+- ![alt text](image-4.png)
+- Two kind of classes: Domain Classes(Model Classes) and Service Class(Data Access Layer, Services)
+- Static DI: Application needs to restart if anything changes.
+- Static Dependency Injection is usually set up at compile-time. 
+- It's the standard way of using DI in frameworks like ASP.NET Core.
+- Faster as dependencies are resolved once at the start.
+- Easier to manage and understand as everything is configured up front.
+- Changing dependencies at runtime is difficult.
+```c#
+ // ConfigureServices method
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddTransient<IMyService, MyService>();
+    services.AddSingleton<ISingletonService, SingletonService>();
+    services.AddScoped<IScopedService, ScopedService>();
+}
+
+
+```
+## Dynamic DI for domain objects: 
+- Dynamic Dependency Injection is resolved at runtime, which allows for more flexibility.
+-  It can adapt to changing requirements during the application's execution.
+-  Can change dependencies or add new ones on the fly.
+```c#
+ public class MyClass
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public MyClass(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public void ExecuteService()
+    {
+        var myService = _serviceProvider.GetService<IMyService>();
+        myService?.DoSomething();
+    }
+}
+
+
+```
+- Resolves dependencies at runtime, providing flexibility and adaptability for complex scenarios.
+
+## CQRS Design Pattern 
+- Separate Reads from the Writes...Reads are always more so we want to handle them separately and scale it independently
+- The CQRS (Command Query Responsibility Segregation) design pattern is an architectural pattern that separates the read (query) and write (command) operations of a data store. This separation allows for optimized and scalable handling of each type of operation.
+- Command: This represents operations that change the state of the application, such as creating, updating, or deleting data.
+- Query: This represents operations that retrieve data without modifying it.
+- Segregation: Commands and queries are handled by different models, services, or methods, allowing for optimization and scalability of each.
+
+```c#
+//Command and Command Handler
+public class CreateOrderCommand
+{
+    public int OrderId { get; set; }
+    public string Product { get; set; }
+    public int Quantity { get; set; }
+}
+
+public class CreateOrderHandler
+{
+    public void Handle(CreateOrderCommand command)
+    {
+        // Logic to create order
+    }
+}
+
+
+//Query and Query Handler
+public class GetOrderQuery
+{
+    public int OrderId { get; set; }
+}
+
+public class GetOrderHandler
+{
+    public Order Handle(GetOrderQuery query)
+    {
+        // Logic to retrieve order details
+        return new Order();
+    }
+}
+
+//Define the model 
+public class Order
+{
+    public int OrderId { get; set; }
+    public string Product { get; set; }
+    public int Quantity { get; set; }
+    public DateTime CreatedDate { get; set; }
+}
+
+
+
+```
+- CQRS can be combined with other patterns like Event Sourcing for even more powerful architectures.
